@@ -10,7 +10,7 @@ userID = 1
 stockTicker = 'AAPL'
 numSharesHeld = 43.0
 shareDate = '2020-01-03'
-
+#must verify date is in correct format
 remStockTicker = 'AAPL'
 remNumSharesHeld = 43.0
 remShareDate = '2020-01-03'
@@ -61,15 +61,14 @@ def calcInvestment(userID):
         datePur = i[3]
 
         currentDate = datetime.now().strftime('%Y-%m-%d')
-        date = datetime.strptime(datePur, '%Y-%m-%d')
         stockInfo = yf.Ticker(stockTicker)
         stockHist = stockInfo.history(start=datePur, end=currentDate, interval = '1d')
-        print(stockHist)
+        closingFirst = stockHist['Open'][0]
+        closingCurr = stockHist['Open'][len(stockHist)-1]
+        currPrice = round(closingCurr*float(sharesHeld),5)
+        origPrice = round(closingFirst*float(sharesHeld),5)
+        print("Stock ticker: ", stockTicker, "has current value", currPrice, "and initial value", origPrice)
 
-       #extract the relevant information from the stockHist dataframe
-        #to do: find initial price, find final price, find difference, find percentage change
-
-addInvestment(userID, stockTicker, numSharesHeld, shareDate)
 calcInvestment(userID)
 
 
