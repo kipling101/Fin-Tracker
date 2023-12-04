@@ -10,7 +10,15 @@ def createAccount():
 
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor() 
-    #check user does not exist already
+
+    checkDupSQL = "SELECT * FROM Users WHERE name = %s"
+    cursor.execute(checkDupSQL, (inputUsername,))
+    duplicateCheck = cursor.fetchall()
+
+    if duplicateCheck:
+        print("Username already exists, please try again.")
+        return
+    
     if inputPassword == inputPasswordVerify:
         accCreateSQL = "INSERT INTO Users (name, password) VALUES (%s, %s)"
         cursor.execute(accCreateSQL, (inputUsername, inputPassword))
@@ -24,5 +32,3 @@ def createAccount():
 
     else:
         print("Passwords do not match, please try again.")
-
-createAccount()
