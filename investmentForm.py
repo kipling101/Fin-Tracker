@@ -16,10 +16,10 @@ remNumSharesHeld = 43.0
 remShareDate = '2020-01-03'
 
 def addInvestment(userID, stockTicker, numSharesHeld, shareDate):
-
+    #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
-
+    #inserts the inputted data into the currInvestment table
     addInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
     cursor.execute(addInvSQL, (userID, stockTicker, numSharesHeld, shareDate))
     db.commit()
@@ -27,19 +27,20 @@ def addInvestment(userID, stockTicker, numSharesHeld, shareDate):
     print("Investment added successfully!")
 
 def remInvestment(userID, remStockTicker, remNumSharesHeld, remShareDate):
-
+    #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
-
+    #checks if there is a investment that matches the inputted data
     remInvSQL = "SELECT * FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s AND shareDate = %s"
     cursor.execute(remInvSQL, (userID, remStockTicker, remNumSharesHeld, remShareDate))
     results = cursor.fetchall()
 
-    #can be improved by using transaction ID instead of searching against all fields
+    #if a result is returned, deletes the investment from the database
     if results:
         removeInvSQL = "DELETE FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s AND shareDate = %s"
         cursor.execute(removeInvSQL, (userID, remStockTicker, remNumSharesHeld, remShareDate))
         db.commit()
+
         print("Investment removed successfully!")
 
     else:    
@@ -47,26 +48,27 @@ def remInvestment(userID, remStockTicker, remNumSharesHeld, remShareDate):
 
 
 def calcInvestment(userID):
+    #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
-
+    #finds all of the investment information for the user given by the userID
     calcInvSQL = "SELECT * FROM currInvestment WHERE userID = %s"
     cursor.execute(calcInvSQL, (userID,))
-    curHolding = cursor.fetchall()
+    curHolding = cursor.fetchall() #returns all the rows as a list of tuples
 
     for i in curHolding:
-
+        #for each investment, finds the current price and the initial price
         stockTicker = i[1]
         sharesHeld = i[2]
         datePur = i[3]
-
-        currentDate = datetime.now().strftime('%Y-%m-%d')
-        stockInfo = yf.Ticker(stockTicker)
-        stockHist = stockInfo.history(start=datePur, end=currentDate, interval = '1d')
-        closingFirst = stockHist['Open'][0]
-        closingCurr = stockHist['Open'][len(stockHist)-1]
-        currPrice = round(closingCurr*float(sharesHeld),5)
-        origPrice = round(closingFirst*float(sharesHeld),5)
+        
+        currentDate = datetime.now().strftime('%Y-%m-%d') #finds the current date
+        stockInfo = yf.Ticker(stockTicker) # finds the stock information
+        stockHist = stockInfo.history(start=datePur, end=currentDate, interval = '1d') #finds the stock history from the date of purchase to the current date
+        closingFirst = stockHist['Open'][0] #finds the opening price on the date of purchase
+        closingCurr = stockHist['Open'][len(stockHist)-1] #finds the opening price on the current date
+        currPrice = round(closingCurr*float(sharesHeld),5) #calculates the current price of the investment
+        origPrice = round(closingFirst*float(sharesHeld),5) #calculates the initial price of the investment
         print("Stock ticker: ", stockTicker, "has current value", currPrice, "and initial value", origPrice)
 
 calcInvestment(userID)
