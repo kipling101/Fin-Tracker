@@ -1,10 +1,6 @@
-import numpy as np 
-import pandas as pd
 import yfinance as yf
-from statistics import mean
 import datetime; from datetime import timedelta, datetime
 import mysql.connector
-from mysql.connector import Error
 
 userID = 1
 stockTicker = 'AAPL'
@@ -46,7 +42,6 @@ def remInvestment(userID, remStockTicker, remNumSharesHeld, remShareDate):
     else:    
         print("No such investment exists, please verify data inputted and try again.")
 
-
 def calcInvestment(userID):
     #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
@@ -63,10 +58,11 @@ def calcInvestment(userID):
         datePur = i[3]
         
         currentDate = datetime.now().strftime('%Y-%m-%d') #finds the current date
-        stockInfo = yf.Ticker(stockTicker) # finds the stock information
-        stockHist = stockInfo.history(start=datePur, end=currentDate, interval = '1d') #finds the stock history from the date of purchase to the current date
+        stockInfo = yf.Ticker(stockTicker) #sets the ticket to a given variable
+        #finds the daily stock history information from the date of purchase to the current date
+        stockHist = stockInfo.history(start=datePur, end=currentDate, interval = '1d')
         closingFirst = stockHist['Open'][0] #finds the opening price on the date of purchase
-        closingCurr = stockHist['Open'][len(stockHist)-1] #finds the opening price on the current date
+        closingCurr = stockHist['Open'][len(stockHist)-1] #finds the opening price on the current date, use closing price?
         currPrice = round(closingCurr*float(sharesHeld),5) #calculates the current price of the investment
         origPrice = round(closingFirst*float(sharesHeld),5) #calculates the initial price of the investment
         print("Stock ticker: ", stockTicker, "has current value", currPrice, "and initial value", origPrice)

@@ -24,7 +24,8 @@ def createAccount(inputUsername, inputPassword, inputPasswordVerify):
         print("Username already exists, please try again.")
         return
 
-    #checks if the inputted password and the inputted password verification are the same, if they are then it inserts the username and password into the database
+    #checks if the inputted password and the inputted password verification are the same, if they are 
+    #then it inserts the username and password into the database
     if inputPassword == inputPasswordVerify:
         cursor.execute("INSERT INTO Users (name, password) VALUES (%s, %s)", (inputUsername, inputPassword))
         db.commit()

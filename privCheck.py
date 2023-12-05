@@ -19,7 +19,8 @@ def privCheck(userID, levelReq):
     levelReqList = [*str(levelReq)]
     userPrivList = [*str(userPriv[0][0])]
 
-    #checks if the user has sufficient privileges for each element in the list, if element 0 of both lists are equal to 1 then it returns True, if user has does not have permission
+    #checks if the user has sufficient privileges for each element in the list, if element 0 of both lists 
+    #are equal to 1 then it returns True, if user has does not have permission
     #for an element, but levelReq is 1 then it returns False. Otherwise returns nothing
 
     for i in range(len(levelReqList)):

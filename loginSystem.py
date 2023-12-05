@@ -17,12 +17,12 @@ def submitLogin():
 
     #retrieves a list of users for which the username and password match the ones inputted into the Username and Password fields
     cursor.execute("SELECT * FROM Users WHERE name = %s and password = %s", (inputUsername, inputPassword))
-    results = cursor.fetchall()
+    userPresent = cursor.fetchall()
 
-    #add code to handle multiple user with same name being returned
-    if results:
+    #create code to handle multiple user with same name being returned
+    if userPresent:
         #retrieves the privLevel of the user
-        cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (results[0][0],))
+        cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userPresent[0][0],))
         privResults = cursor.fetchall()
         tk.messagebox.showinfo(title="Login",message=" Login successful.\n\n Welcome "+inputUsername+".")
         return privResults
