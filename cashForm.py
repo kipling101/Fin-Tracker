@@ -14,6 +14,7 @@ removeReason = 'gfdoije'
 removeAmount = 43
 removeDate = 12
 removeAPR = 1.2
+
 userID = 1
 
 def cashAdd(userID, inputName, inputAmount, inputDate, inputAPR):
@@ -25,18 +26,18 @@ def cashAdd(userID, inputName, inputAmount, inputDate, inputAPR):
                    (userID, inputName, inputAmount, inputDate, inputAPR))
     db.commit()
 
-def cashRemove(userID, inputName, inputAmount, inputDate, inputAPR):
+def cashRemove(userID, removeName, removeAmount, removeDate, removeAPR):
     #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
     #checks if there is a cash transaction that matches the inputted data
     cursor.execute("SELECT * FROM cash WHERE userID = %s AND trnsName = %s AND trnsAmount = %s AND trnsDate = %s AND trnsAPR = %s", 
-                   (userID, inputName, inputAmount, inputDate, inputAPR))
+                   (userID, removeName, removeAmount, removeDate, removeAPR))
     results = cursor.fetchall()
     #if a result is returned, deletes the cash transaction from the database
     if results:
         cursor.execute("DELETE FROM cash WHERE userID = %s AND trnsName = %s AND trnsAmount = %s AND trnsDate = %s AND trnsAPR = %s", 
-                       (userID, inputName, inputAmount, inputDate, inputAPR))
+                       (userID, removeName, removeAmount, removeDate, removeAPR))
         db.commit()
 
     else: print("No such cash transaction exists, please verify data inputted and try again.")

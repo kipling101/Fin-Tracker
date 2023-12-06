@@ -5,7 +5,7 @@ from tkinter import messagebox
 
 def submitLogin():
 
-    inputUsername = enterUsername.get()
+    inputUsername = enterUsrn.get()
     inputPassword = enterPwd.get()
     print(inputUsername, inputPassword)
     
@@ -41,8 +41,8 @@ root.resizable(0,0)
 labUsername = tk.Label(root, text ="Username")
 labUsername.place(x = 50, y = 20)
 
-enterUsername = Entry(root, width = 35)
-enterUsername.place(x = 75, y = 50, width = 100)
+enterUsrn = Entry(root, width = 35)
+enterUsrn.place(x = 75, y = 50, width = 100)
 
 labPwd = tk.Label(root, text ="Password")
 labPwd.place(x = 50, y = 80)

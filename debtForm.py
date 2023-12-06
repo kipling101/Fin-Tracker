@@ -18,18 +18,13 @@ def calcDebt(userID,totalDebt):
 
     for i in curDebt:
         #extracts the debt information from the tuple
-        debtValue = i[1]
         debtName = i[2] #to be used for the visual interface
-        debtDate = i[3]
-        debtAPR = i[4]/100
-        
-        debtDate = datetime.strptime(debtDate, '%Y-%m-%d') #formats the debt data to a datetime object
+       
+        debtDate = datetime.strptime(i[3], '%Y-%m-%d') #formats the debt data to a datetime object
         daysSince = (today - debtDate).days #finds the number of days since the debt was taken out
 
-        #calculates the interest accrued on the debt using compound interest formula
-        currDebtVal = float(debtValue)*((1+(debtAPR/365))**daysSince)
-        print(currDebtVal)
-        totalDebt += currDebtVal
+        #calculates the interest accrued on the debt using compound interest formula, and adds it to the total debt
+        totalDebt += float(i[1])*((1+((i[4]/100)/365))**daysSince)
 
     print("£",round(totalDebt,2))
 

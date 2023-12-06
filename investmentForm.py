@@ -3,38 +3,38 @@ import datetime; from datetime import timedelta, datetime
 import mysql.connector
 
 userID = 1
-stockTicker = 'AAPL'
-numSharesHeld = 43.0
-shareDate = '2020-01-03'
+addStockTicker = 'AAPL'
+addShareNum = 43.0
+addShareDate = '2020-01-03'
 #must verify date is in correct format
 remStockTicker = 'AAPL'
-remNumSharesHeld = 43.0
-remShareDate = '2020-01-03'
+remShareNum = 43.0
 
-def addInvestment(userID, stockTicker, numSharesHeld, shareDate):
+
+def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
     #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
     #inserts the inputted data into the currInvestment table
     addInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
-    cursor.execute(addInvSQL, (userID, stockTicker, numSharesHeld, shareDate))
+    cursor.execute(addInvSQL, (userID, addStockTicker, addShareNum, addShareDate))
     db.commit()
 
     print("Investment added successfully!")
 
-def remInvestment(userID, remStockTicker, remNumSharesHeld, remShareDate):
+def remInvestment(userID, remStockTicker, remShareNum, remShareDate):
     #initialise database connection
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
     #checks if there is a investment that matches the inputted data
-    remInvSQL = "SELECT * FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s AND shareDate = %s"
-    cursor.execute(remInvSQL, (userID, remStockTicker, remNumSharesHeld, remShareDate))
+    remInvSQL = "SELECT * FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s"
+    cursor.execute(remInvSQL, (userID, remStockTicker, remShareNum,))
     results = cursor.fetchall()
 
     #if a result is returned, deletes the investment from the database
     if results:
         removeInvSQL = "DELETE FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s AND shareDate = %s"
-        cursor.execute(removeInvSQL, (userID, remStockTicker, remNumSharesHeld, remShareDate))
+        cursor.execute(removeInvSQL, (userID, remStockTicker, remShareNum, remShareDate))
         db.commit()
 
         print("Investment removed successfully!")

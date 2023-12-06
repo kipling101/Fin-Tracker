@@ -12,8 +12,8 @@ def permModify(userID):
     db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
     cursor = db.cursor()
     #finds the current privilege level of the user given by the userID
-    cursor.execute("SELECT privLevel FROM privileges WHERE id = %s", (userID,))
-    currPrivLevel = cursor.fetchall()
+    cursor.execute("SELECT privLevel FROM privileges WHERE userid = %s", (userID,))
+    curPrivLevel = cursor.fetchall()
     #verifies userID is present
     if userID:
 
