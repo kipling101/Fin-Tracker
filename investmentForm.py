@@ -5,7 +5,7 @@ import mysql.connector
 userID = 1
 addStockTicker = 'AAPL'
 addShareNum = 43.0
-addShareDate = '2020-01-03'
+addShareDate = '2023-12-08'
 #must verify date is in correct format
 remStockTicker = 'AAPL'
 remShareNum = 43.0
@@ -68,5 +68,3 @@ def calcInvestment(userID):
         print("Stock ticker: ", stockTicker, "has current value", currPrice, "and initial value", origPrice)
 
 calcInvestment(userID)
-
-
