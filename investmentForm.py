@@ -31,7 +31,7 @@ def remInvestment(userID, remStockTicker, remShareNum, remShareDate):
     cursor.execute(remInvSQL, (userID, remStockTicker, remShareNum,))
     results = cursor.fetchall()
 
-    #if a result is returned, deletes the investment from the database
+    #if a result is returned, deletes the investment from the database !! CHANGE VARIABLE NAME !!
     if results:
         removeInvSQL = "DELETE FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s AND shareDate = %s"
         cursor.execute(removeInvSQL, (userID, remStockTicker, remShareNum, remShareDate))

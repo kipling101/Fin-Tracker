@@ -24,4 +24,6 @@ def permModify(userID):
 
         print("Privilege level updated.")
 
+    else: print("User not found.")
+    
 permModify(userID)
