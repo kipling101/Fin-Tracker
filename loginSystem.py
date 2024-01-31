@@ -2,8 +2,12 @@ import tkinter as tk
 import mysql.connector
 from tkinter import *
 from tkinter import messagebox
+from __main__ import *
+global incorrectAttempts
+incorrectAttempts = 0
 
 def submitLogin():
+    global incorrectAttempts
 
     inputUsername = enterUsrn.get()
     inputPassword = enterPwd.get()
@@ -26,13 +30,19 @@ def submitLogin():
         privResults = cursor.fetchall()
         tk.messagebox.showinfo(title="Login",message=" Login successful.\n\n Welcome "+inputUsername+".")
         return privResults
-
+    
     else:
         #if no users are returned the user will be informed via a error box
         tk.messagebox.showerror(title="Login",message="Incorrect username or password")
-        return False
-
-#general code for creating a window                           
+        incorrectAttempts += 1
+        print(incorrectAttempts)
+        if incorrectAttempts == 3:
+            tk.messagebox.showerror(title="Login",message="Too many incorrect attempts, please try again later")
+            root.destroy()
+        return incorrectAttempts
+    
+print(incorrectAttempts)
+ #creates the window
 root = tk.Tk()
 root.geometry("250x300")
 root.title("FinTracker")
@@ -52,6 +62,9 @@ enterPwd.place(x = 75, y = 110, width = 100)
 #creates a button which calls the submitLogin function when clicked
 loginBtn = tk.Button(root, text ="Login", bg ='aqua', command = submitLogin)
 loginBtn.place(x = 150, y = 155, width = 55)
+
+cancelBtn = tk.Button(root, text ="Cancel", bg ='aqua', command = root.destroy)
+cancelBtn.place(x = 50, y = 155, width = 55)
 
 #keeps the code running until the window is closed
 root.mainloop()

@@ -1,6 +1,13 @@
 import yfinance as yf
 import datetime; from datetime import timedelta, datetime
 import mysql.connector
+import pandas as pd
+import tkinter as tk
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
 
 userID = 1
 addStockTicker = 'AAPL'
@@ -10,11 +17,11 @@ addShareDate = '2023-12-08'
 remStockTicker = 'AAPL'
 remShareNum = 43.0
 
+db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
+cursor = db.cursor()
 
 def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
-    #initialise database connection
-    db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-    cursor = db.cursor()
+
     #inserts the inputted data into the currInvestment table
     addInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
     cursor.execute(addInvSQL, (userID, addStockTicker, addShareNum, addShareDate))
@@ -23,9 +30,7 @@ def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
     print("Investment added successfully!")
 
 def remInvestment(userID, remStockTicker, remShareNum, remShareDate):
-    #initialise database connection
-    db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-    cursor = db.cursor()
+
     #checks if there is a investment that matches the inputted data
     remInvSQL = "SELECT * FROM currInvestment WHERE userID = %s AND stockTicker = %s AND numSharesHeld = %s"
     cursor.execute(remInvSQL, (userID, remStockTicker, remShareNum,))
@@ -42,10 +47,8 @@ def remInvestment(userID, remStockTicker, remShareNum, remShareDate):
     else:    
         print("No such investment exists, please verify data inputted and try again.")
 
-def calcInvestment(userID):
-    #initialise database connection
-    db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-    cursor = db.cursor()
+def calcInvestment(userID, totalCheck):
+    valHistory = []; dateHistory = []; runningTotal = 0
     #finds all of the investment information for the user given by the userID
     calcInvSQL = "SELECT * FROM currInvestment WHERE userID = %s"
     cursor.execute(calcInvSQL, (userID,))
@@ -62,9 +65,35 @@ def calcInvestment(userID):
         #finds the daily stock history information from the date of purchase to the current date
         stockHist = stockInfo.history(start=datePur, end=currentDate, interval = '1d')
         closingFirst = stockHist['Open'][0] #finds the opening price on the date of purchase
-        closingCurr = stockHist['Open'][len(stockHist)-1] #finds the opening price on the current date, use closing price?
+        closingCurr = stockHist['Open'][len(stockHist)-1] #finds the opening price on the current date
         currPrice = round(closingCurr*float(sharesHeld),5) #calculates the current price of the investment
         origPrice = round(closingFirst*float(sharesHeld),5) #calculates the initial price of the investment
         print("Stock ticker: ", stockTicker, "has current value", currPrice, "and initial value", origPrice)
 
-calcInvestment(userID)
+        if totalCheck == True:
+            for date, row in stockHist.iterrows():
+
+                valHistory.append(stockHist['Open'][date]*float(sharesHeld))
+                dateHistory.append(date.strftime('%Y-%m-%d'))
+            
+            return [valHistory, dateHistory]
+
+main = tk.Tk()
+main.title("Modify Permissions")
+main.geometry("500x500")  # Set your desired width and height
+
+# Create a Matplotlib figure and plot with the specified size
+f = Figure(figsize=(5,5), dpi=100)
+a = f.add_subplot(111)
+
+a.plot(calcInvestment(userID, True)[1], calcInvestment(userID, True)[0], ls = '-')
+
+a.set_title("Investment Value")
+a.set_xlabel("Date")
+a.set_ylabel("Value (£)")
+
+canvas1=FigureCanvasTkAgg(f,master=main)
+canvas1.draw()
+canvas1.get_tk_widget().pack(side="top",fill='both',expand=True)
+
+main.mainloop()

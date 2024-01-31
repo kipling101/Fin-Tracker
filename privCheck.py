@@ -4,8 +4,8 @@ from tkinter import *
 from tkinter import messagebox
 
 #initialise variables, will be made inputs later
-userID = 1
-levelReq = 10
+userID = 4
+levelReq = '1010'
 
 def privCheck(userID, levelReq):
 
@@ -19,6 +19,10 @@ def privCheck(userID, levelReq):
     levelReqList = [*str(levelReq)]
     userPrivList = [*str(userPriv[0][0])]
 
+    if userPriv == "":
+        print("An error has occured, no such user exists. Please try again.")
+        return
+
     #checks if the user has sufficient privileges for each element in the list, if element 0 of both lists 
     #are equal to 1 then it returns True, if user has does not have permission
     #for an element, but levelReq is 1 then it returns False. Otherwise returns nothing
@@ -26,13 +30,12 @@ def privCheck(userID, levelReq):
     for i in range(len(levelReqList)):
         if levelReqList[i] == '1':
             if userPrivList[i] == '1':
-                print("User has sufficient privileges for element", i,".")
-                
+                continue
             else:
-                print("User does not have sufficient privileges for element", i,".")
-                
+                return False    
         else:
-            print("Not applicable.")
-
+            continue
+    
+    return True
 #runs the function
-privCheck(userID, levelReq)
+print(privCheck(userID, levelReq))
