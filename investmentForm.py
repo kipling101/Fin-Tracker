@@ -3,11 +3,11 @@ import datetime; from datetime import timedelta, datetime
 import mysql.connector
 import pandas as pd
 import tkinter as tk
+from tkinter import messagebox
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
-
 
 userID = 1
 addStockTicker = 'AAPL'
@@ -22,6 +22,15 @@ cursor = db.cursor()
 
 def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
 
+    if addShareDate > datetime.now().strftime('%Y-%m-%d') or addShareDate == "":
+        tk.m
+        return
+    if addShareNum <= 0:
+        print("Error: Number of shares must be greater than 0.")
+        return
+    if addStockTicker == "":
+        print("Error: Stock ticker cannot be empty.")
+        return
     #inserts the inputted data into the currInvestment table
     addInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
     cursor.execute(addInvSQL, (userID, addStockTicker, addShareNum, addShareDate))
@@ -80,9 +89,9 @@ def calcInvestment(userID, totalCheck):
 
 main = tk.Tk()
 main.title("Modify Permissions")
-main.geometry("500x500")  # Set your desired width and height
+main.geometry("500x500")  #sets the width and height 
 
-# Create a Matplotlib figure and plot with the specified size
+#creates a graph of the investment value over time
 f = Figure(figsize=(5,5), dpi=100)
 a = f.add_subplot(111)
 
