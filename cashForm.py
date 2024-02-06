@@ -44,7 +44,6 @@ def cashAdd(userID, inputName, inputAmount, inputDate, inputAPR):
 def cashRemove(userID, removeName, removeAmount, removeAPR):
     #inverts the values to add the cash and apr
     removeAmount = removeAmount * -1
-    removeAPR = removeAPR * -1
     removeDate = datetime.now().strftime('%Y-%m-%d')
     cashAdd(userID, removeName, removeAmount, removeDate, removeAPR)
 
