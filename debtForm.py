@@ -122,7 +122,7 @@ cursor.execute("SELECT * FROM debtHoldings WHERE userID = %s", (userID,))
 curDebt = cursor.fetchall()
 
 main = tk.Tk()
-main.title("Modify Permissions")
+main.title("Debt")
 main.geometry("500x500")
 
 width, height = 100, 100

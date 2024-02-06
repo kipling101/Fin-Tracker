@@ -23,13 +23,13 @@ cursor = db.cursor()
 def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
 
     if addShareDate > datetime.now().strftime('%Y-%m-%d') or addShareDate == "":
-        tk.m
+        tk.messagebox.showerror(title="Add Investment", message="Error: Invalid Date.")
         return
     if addShareNum <= 0:
-        print("Error: Number of shares must be greater than 0.")
+        tk.messagebox.showerror(title="Add Investment", message="Error: Invalid Number of Shares.")
         return
     if addStockTicker == "":
-        print("Error: Stock ticker cannot be empty.")
+        tk.messagebox.showerror(title="Add Investment", message="Error: Invalid Stock Ticker.")
         return
     #inserts the inputted data into the currInvestment table
     addInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
@@ -88,7 +88,7 @@ def calcInvestment(userID, totalCheck):
             return [valHistory, dateHistory]
 
 main = tk.Tk()
-main.title("Modify Permissions")
+main.title("Investment")
 main.geometry("500x500")  #sets the width and height 
 
 #creates a graph of the investment value over time
