@@ -29,23 +29,39 @@ db = mysql.connector.connect(host ="localhost", user = "root", password = "pass1
 cursor = db.cursor()
 
 def cashAdd(userID, inputName, inputAmount, inputDate, inputAPR):
+    #performs input validation
     if inputDate > datetime.now().strftime('%Y-%m-%d') or inputDate == "":
         tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Date.")
         return
     if inputName == "":
         tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Name.")
         return
-    #inserts the inputted data into the cash table
-    cursor.execute("INSERT INTO cash (userID, trnsName, trnsAmount, trnsDate, trnsAPR) VALUES (%s, %s, %s, %s, %s)", 
+    if userID == "" or inputName == "" or inputAmount == "" or inputDate == "" or inputAPR == "":
+        tk.messagebox.showerror(title="Add Cash", message="Error: Please input all fields.")
+        return
+    if inputAmount.replace(".", "").isnumeric() and inputAPR.replace(".", "").isnumeric():
+        #inserts the inputted data into the cash table
+        cursor.execute("INSERT INTO cash (userID, trnsName, trnsAmount, trnsDate, trnsAPR) VALUES (%s, %s, %s, %s, %s)", 
                    (userID, inputName, float(inputAmount), inputDate, inputAPR))
-    db.commit()
-    tk.messagebox.showinfo(title="Add Cash", message="Cash added successfully!")
+        db.commit()
+        tk.messagebox.showinfo(title="Add Cash", message="Cash changed successfully!")
+    else:
+        tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Amount or APR.")
+        return
 
 def cashRemove(userID, removeName, removeAmount, removeAPR):
     #inverts the values to add the cash and apr
-    removeAmount = removeAmount * -1
-    removeDate = datetime.now().strftime('%Y-%m-%d')
-    cashAdd(userID, removeName, removeAmount, removeDate, removeAPR)
+    if userID == "" or removeName == "" or removeAmount == "" or removeAPR == "":
+        tk.messagebox.showerror(title="Remove Cash", message="Error: Please input all fields.")
+        return
+    if removeAmount.replace(".", "").isnumeric() or removeAPR.replace(".", "").isnumeric():
+        removeAmount = float(removeAmount); removeAPR = float(removeAPR)
+        removeAmount = removeAmount * -1
+        removeDate = datetime.now().strftime('%Y-%m-%d')
+        cashAdd(userID, removeName, removeAmount, removeDate, removeAPR)
+    else: 
+        tk.messagebox.showerror(title="Remove Cash", message="Error: Invalid Amount or APR.")
+        return
 
 def calcCash(userID):
     dateList = []
@@ -158,7 +174,7 @@ enterRemoveCashAPR.place(x=1025, y=810, width=100)
 
 #button which removes the cash
 removeCashButton = tk.Button(main, text="Remove Cash", command=lambda: cashRemove(userID, enterRemoveCashName.get(), 
-                                                                                  float(enterRemoveCashAmount.get()), float(enterRemoveCashAPR.get())))
+                                                                                  enterRemoveCashAmount.get(), enterRemoveCashAPR.get()))
 removeCashButton.place(x=1000, y=840, width=100)
 
 main.mainloop()

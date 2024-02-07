@@ -3,7 +3,7 @@ import datetime; from datetime import timedelta, datetime
 import mysql.connector
 import pandas as pd
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import *
 import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -78,14 +78,40 @@ def calcInvestment(userID, totalCheck):
         currPrice = round(closingCurr*float(sharesHeld),5) #calculates the current price of the investment
         origPrice = round(closingFirst*float(sharesHeld),5) #calculates the initial price of the investment
         print("Stock ticker: ", stockTicker, "has current value", currPrice, "and initial value", origPrice)
+    
+        #fetch all investments for the current holding from the SQL table
+        cursor.execute("SELECT * FROM currInvestment WHERE stockTrnsID = %s", (i[4],))
+        investments = cursor.fetchall()
+        # Initialize the lists
+        valHistory = []
+        dateHistory = []
 
-        if totalCheck == True:
-            for date, row in stockHist.iterrows():
+        # Iterate over each day
+        for date, row in stockHist.iterrows():
+            totalValue = 0
 
-                valHistory.append(stockHist['Open'][date]*float(sharesHeld))
-                dateHistory.append(date.strftime('%Y-%m-%d'))
-            
-            return [valHistory, dateHistory]
+            # Iterate over each holding
+            for i in curHolding:
+                # Fetch all investments for the current holding from the SQL table
+                cursor.execute("SELECT * FROM currinvestment WHERE stockTrnsID = %s AND shareDate <= %s", (i[4], date))
+                investments = cursor.fetchall()
+
+                # Iterate over each investment
+                for investment in investments:
+                    # Extract the number of shares and the opening price
+                    sharesHeld = float(investment[2])  # replace 1 with the correct index for sharesHeld in your data
+                    openPrice = stockHist['Open'][date]
+
+                    # Calculate the value of this investment and add it to the total
+                    totalValue += openPrice * sharesHeld
+
+            # Append the total value and the date to the lists
+            valHistory.append(totalValue)
+            dateHistory.append(date.strftime('%Y-%m-%d'))
+
+        print(valHistory, dateHistory)
+
+        return [valHistory, dateHistory]
 
 main = tk.Tk()
 main.title("Investment")
@@ -95,7 +121,9 @@ main.geometry("500x500")  #sets the width and height
 f = Figure(figsize=(5,5), dpi=100)
 a = f.add_subplot(111)
 
-a.plot(calcInvestment(userID, True)[1], calcInvestment(userID, True)[0], ls = '-')
+investmentOvTime = calcInvestment(userID, True)
+#plots the investment value over time
+a.plot(investmentOvTime[1], investmentOvTime[0], ls = '-')
 
 a.set_title("Investment Value")
 a.set_xlabel("Date")
@@ -104,5 +132,51 @@ a.set_ylabel("Value (£)")
 canvas1=FigureCanvasTkAgg(f,master=main)
 canvas1.draw()
 canvas1.get_tk_widget().pack(side="top",fill='both',expand=True)
+
+
+#creates the add cash function, with boxes
+tk.Label(main, text="Add Cash", font='Helvetica 16').place(x=20, y=600)
+#creates the add cash function, with boxes
+addTicker = tk.Label(main, text="Name")
+addTicker.place(x=50, y=640)
+enterTickerName = Entry(main, width=35)
+enterTickerName.place(x=75, y=670, width=100)
+
+addStockAmount = tk.Label(main, text="Value")
+addStockAmount.place(x=50, y=700)
+enterStockAmount = Entry(main, width=35)
+enterStockAmount.place(x=75, y=730, width=100)
+
+addStockDate = tk.Label(main, text="Date")
+addStockDate.place(x=50, y=760)
+enterStockDate = Entry(main, width=35)
+enterStockDate.place(x=75, y=790, width=100)
+
+#button which adds the investment
+addInvestButton = tk.Button(main, text="Add Cash", command=lambda: addInvestment(userID, enterTickerName.get(), enterStockAmount.get(), enterStockDate.get()))
+addInvestButton.place(x=75, y=880, width=100)
+
+tk.Label(main, text = "Remove Cash", font='Helvetica 16').place(x = 1000, y = 600)
+
+#creates the remove cash function, with boxes
+removeCashName = tk.Label(main, text="Name")
+removeCashName.place(x=1000, y=640)
+enterRemoveCashName = Entry(main, width=35)
+enterRemoveCashName.place(x=1025, y=670, width=100)
+
+removeCashAmount = tk.Label(main, text="Value")
+removeCashAmount.place(x=1000, y=700)
+enterRemoveCashAmount = Entry(main, width=35)
+enterRemoveCashAmount.place(x=1025, y=730, width=100)
+
+removeCashAPR = tk.Label(main, text="APR")
+removeCashAPR.place(x=1000, y=780)
+enterRemoveCashAPR = Entry(main, width=35)
+enterRemoveCashAPR.place(x=1025, y=810, width=100)
+
+#button which removes the cash
+removeCashButton = tk.Button(main, text="Remove Cash", command=lambda: remInvestment(userID, enterRemoveCashName.get(), 
+                                                                                  enterRemoveCashAmount.get(), enterRemoveCashAPR.get()))
+removeCashButton.place(x=1000, y=840, width=100)
 
 main.mainloop()

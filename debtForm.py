@@ -73,7 +73,7 @@ def addDebt(userID, addDebtAmount, addDebtName, addDebtDate, addDebtAPR):
         if addDebtDate > datetime.now().strftime('%Y-%m-%d'):
             tk.messagebox.showerror("Error", "Please enter a valid date!")
             return
-        if float(addDebtAmount) < 0 and addDebtAmount.replace(".", "").isnumeric():
+        if float(addDebtAmount) < 0 and addDebtAmount.replace(".", "").isnotnumeric():
             tk.messagebox.showerror("Error", "Please enter a valid amount!")
             return
         if float(addDebtAPR) < 0:
