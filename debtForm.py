@@ -140,11 +140,12 @@ a.plot(calcDebt(userID,totalDebt)[1], calcDebt(userID,totalDebt)[0], ls = '-')
 
 a.set_title("Debt Amount")
 a.set_xlabel("Date")
+a.set_ylabel("Value (£)")
 
 #creates the canvas for the graph to be displayed on
-canvas = FigureCanvasTkAgg(f, master=main)
-canvas.draw()
-canvas.get_tk_widget().pack()
+canvas1=FigureCanvasTkAgg(f,master=main)
+canvas1.draw()
+canvas1.get_tk_widget().pack(side="top",fill='both',expand=True)
 
 #creates the add debt function, with boxes
 tk.Label(main, text = "Add Debt", font='Helvetica 16').place(x = 20, y = 600)
@@ -175,9 +176,11 @@ addDebtButton.place(x=75, y=880, width=100)
 tk.Label(main, text = "Remove Debt", font='Helvetica 16').place(x = 1000, y = 600)
 
 #creates an entry field for the user to input the amount they want ro remove
-enterRemoveAmount = tk.Entry(main, width=35).place(x=1000, y=700, width=100)
+enterRemoveAmount = tk.Entry(main, width=35)
+enterRemoveAmount.place(x=1000, y=700, width=100)
 #creates a dropdown box which contains the tranaction ids for the debts
-debtCombobox = ttk.Combobox(main, values=[debt[5] for debt in curDebt]).place(x=1000, y=650, width=100)
+debtCombobox = ttk.Combobox(main, values=[debt[5] for debt in curDebt])
+debtCombobox.place(x=1000, y=650, width=100)
 #button which removes the debt
 removeDebtButton = tk.Button(main, text="Remove Debt", command=lambda: remDebt(userID, debtCombobox.get(), enterRemoveAmount.get())).place(x=1000, y=750, width=100)
 
