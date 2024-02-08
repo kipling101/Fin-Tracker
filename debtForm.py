@@ -145,7 +145,7 @@ a.set_ylabel("Value (£)")
 #creates the canvas for the graph to be displayed on
 canvas1=FigureCanvasTkAgg(f,master=main)
 canvas1.draw()
-canvas1.get_tk_widget().pack(side="top",fill='both',expand=True)
+canvas1.get_tk_widget().pack()
 
 #creates the add debt function, with boxes
 tk.Label(main, text = "Add Debt", font='Helvetica 16').place(x = 20, y = 600)
