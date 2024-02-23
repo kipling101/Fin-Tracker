@@ -8,15 +8,16 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg; from matplotlib
 def menuPage():
 
     #creates the menu interface
-    root = tk.Tk()
-    root.geometry("1980x1080")
-    root.title("FinTracker")
+    main = tk.Tk()
+    main.geometry("1980x1080")
+    main.title("FinTracker")
 
-    home = tk.Button(root, text ="Home", command = lambda: print("Home"), width=25, height = 10).grid(row=0, sticky = "W")
-    cash = tk.Button(root, text ="Cash", command = lambda: print("cash"), width=25, height = 10).grid(row=1, sticky = "W")
-    debt = tk.Button(root, text ="Debt", command = lambda: print("debt"), width=25, height = 10).grid(row=2, sticky = "W")
-    account = tk.Button(root, text ="Account", command = lambda: print("account"), width=25, height = 14).grid(row=4, sticky = "W")
+    home = tk.Button(main, text ="Home", command = lambda: print("Home"), width=25, height = 10).grid(row=0, sticky = "W")
+    cash = tk.Button(main, text ="Cash", command = lambda: print("cash"), width=25, height = 10).grid(row=1, sticky = "W")
+    debt = tk.Button(main, text ="Debt", command = lambda: print("debt"), width=25, height = 10).grid(row=2, sticky = "W")
+    padding = tk.Label(main, text = " ", width=25, height = 17).grid(row=3, sticky = "W")
+    account = tk.Button(main, text ="Account", command = lambda: print("account"), width=25, height = 6).grid(row=4, sticky = "W")
 
-    root.mainloop()
+    main.mainloop()
 
 menuPage()

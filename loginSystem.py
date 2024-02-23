@@ -99,35 +99,35 @@ def loginSystem(userID):
             print(incorrectAttempts)
             if incorrectAttempts == 3:
                 tk.messagebox.showerror(title="Login",message="Too many incorrect attempts, please try again later")
-                root.destroy()
+                main.destroy()
             return incorrectAttempts
     
     #creates the window
-    root = tk.Tk()
-    root.geometry("250x300")
-    root.title("FinTracker")
-    root.resizable(0,0)
-
-    labUsername = tk.Label(root, text ="Username")
+    main = tk.Tk()
+    main.geometry("250x300")
+    main.title("FinTracker")
+    main.resizable(0,0)
+    
+    labUsername = tk.Label(main, text ="Username")
     labUsername.place(x = 50, y = 20)
 
-    enterUsrn = Entry(root, width = 35)
+    enterUsrn = Entry(main, width = 35)
     enterUsrn.place(x = 75, y = 50, width = 100)
 
-    labPwd = tk.Label(root, text ="Password")
+    labPwd = tk.Label(main, text ="Password")
     labPwd.place(x = 50, y = 80)
 
-    enterPwd = Entry(root, show="*", width = 35)
+    enterPwd = Entry(main, show="*", width = 35)
     enterPwd.place(x = 75, y = 110, width = 100)
     #creates a button which calls the submitLogin function when clicked
-    loginBtn = tk.Button(root, text ="Login", bg ='aqua', command = submitLogin)
+    loginBtn = tk.Button(main, text ="Login", bg ='aqua', command = submitLogin)
     loginBtn.place(x = 150, y = 155, width = 55)
 
-    cancelBtn = tk.Button(root, text ="Cancel", bg ='aqua', command = root.destroy)
+    cancelBtn = tk.Button(main, text ="Cancel", bg ='aqua', command = main.destroy)
     cancelBtn.place(x = 50, y = 155, width = 55)
 
     #keeps the code running until the window is closed
-    root.mainloop()
+    main.mainloop()
 
 
 def openDebtForm(userID):
@@ -241,8 +241,15 @@ def openDebtForm(userID):
     curDebt = cursor.fetchall()
 
     main = tk.Tk()
-    main.title("Debt")
-    main.geometry("500x500")
+    main.geometry("1980x1080")
+    main.title("FinTracker")
+
+    home = tk.Button(main, text ="Home", command = lambda: print("Home"), width=25, height = 10).grid(row=0, sticky = "W")
+    cash = tk.Button(main, text ="Cash", command = lambda: print("cash"), width=25, height = 10).grid(row=1, sticky = "W")
+    debt = tk.Button(main, text ="Debt", command = lambda: print("debt"), width=25, height = 10).grid(row=2, sticky = "W")
+    padding = tk.Label(main, text = " ", width=25, height = 17).grid(row=3, sticky = "W")
+    account = tk.Button(main, text ="Account", command = lambda: print("account"), width=25, height = 6).grid(row=4, sticky = "W")
+
 
     width, height = 100, 100
 
