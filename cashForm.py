@@ -25,156 +25,158 @@ totalCash = 0
 
 userID = 1
 
-db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-cursor = db.cursor()
+def __main__(userID):
 
-def cashAdd(userID, inputName, inputAmount, inputDate, inputAPR):
-    #performs input validation
-    if inputDate > datetime.now().strftime('%Y-%m-%d') or inputDate == "":
-        tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Date.")
-        return
-    if inputName == "":
-        tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Name.")
-        return
-    if userID == "" or inputName == "" or inputAmount == "" or inputDate == "" or inputAPR == "":
-        tk.messagebox.showerror(title="Add Cash", message="Error: Please input all fields.")
-        return
-    if inputAmount.replace(".", "").isnumeric() and inputAPR.replace(".", "").isnumeric():
-        #inserts the inputted data into the cash table
-        cursor.execute("INSERT INTO cash (userID, trnsName, trnsAmount, trnsDate, trnsAPR) VALUES (%s, %s, %s, %s, %s)", 
-                   (userID, inputName, float(inputAmount), inputDate, inputAPR))
-        db.commit()
-        tk.messagebox.showinfo(title="Add Cash", message="Cash changed successfully!")
-    else:
-        tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Amount or APR.")
-        return
+    db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
+    cursor = db.cursor()
 
-def cashRemove(userID, removeName, removeAmount, removeAPR):
-    #inverts the values to add the cash and apr
-    if userID == "" or removeName == "" or removeAmount == "" or removeAPR == "":
-        tk.messagebox.showerror(title="Remove Cash", message="Error: Please input all fields.")
-        return
-    if removeAmount.replace(".", "").isnumeric() or removeAPR.replace(".", "").isnumeric():
-        removeAmount = float(removeAmount); removeAPR = float(removeAPR)
-        removeAmount = removeAmount * -1
-        removeDate = datetime.now().strftime('%Y-%m-%d')
-        cashAdd(userID, removeName, removeAmount, removeDate, removeAPR)
-    else: 
-        tk.messagebox.showerror(title="Remove Cash", message="Error: Invalid Amount or APR.")
-        return
+    def cashAdd(userID, inputName, inputAmount, inputDate, inputAPR):
+        #performs input validation
+        if inputDate > datetime.now().strftime('%Y-%m-%d') or inputDate == "":
+            tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Date.")
+            return
+        if inputName == "":
+            tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Name.")
+            return
+        if userID == "" or inputName == "" or inputAmount == "" or inputDate == "" or inputAPR == "":
+            tk.messagebox.showerror(title="Add Cash", message="Error: Please input all fields.")
+            return
+        if inputAmount.replace(".", "").isnumeric() and inputAPR.replace(".", "").isnumeric():
+            #inserts the inputted data into the cash table
+            cursor.execute("INSERT INTO cash (userID, trnsName, trnsAmount, trnsDate, trnsAPR) VALUES (%s, %s, %s, %s, %s)", 
+                    (userID, inputName, float(inputAmount), inputDate, inputAPR))
+            db.commit()
+            tk.messagebox.showinfo(title="Add Cash", message="Cash changed successfully!")
+        else:
+            tk.messagebox.showerror(title="Add Cash", message="Error: Invalid Amount or APR.")
+            return
 
-def calcCash(userID):
-    dateList = []
+    def cashRemove(userID, removeName, removeAmount, removeAPR):
+        #inverts the values to add the cash and apr
+        if userID == "" or removeName == "" or removeAmount == "" or removeAPR == "":
+            tk.messagebox.showerror(title="Remove Cash", message="Error: Please input all fields.")
+            return
+        if removeAmount.replace(".", "").isnumeric() or removeAPR.replace(".", "").isnumeric():
+            removeAmount = float(removeAmount); removeAPR = float(removeAPR)
+            removeAmount = removeAmount * -1
+            removeDate = datetime.now().strftime('%Y-%m-%d')
+            cashAdd(userID, removeName, removeAmount, removeDate, removeAPR)
+        else: 
+            tk.messagebox.showerror(title="Remove Cash", message="Error: Invalid Amount or APR.")
+            return
 
-    #retrieves current cash information for the user given by the userID
+    def calcCash(userID):
+        dateList = []
+
+        #retrieves current cash information for the user given by the userID
+        cursor.execute("SELECT * FROM cash WHERE userID = %s", (userID,))
+        curCash = cursor.fetchall()
+
+        #adds the cash information to the list of cash
+        curCash.sort(key=lambda x: datetime.strptime(x[3], '%Y-%m-%d'))
+        #get todays date, as well as the final date
+        startDate = datetime.strptime(curCash[0][3], '%Y-%m-%d')
+        endDate = datetime.today()
+
+        runningTotalEveryDay = []
+        dateList = []
+
+        #iterates over every day in the list, and calculates the total cash on that day
+        currentDate = startDate
+        while currentDate <= endDate:
+            runningTotal = 0
+            #checks to see if the day the cash was taken out is before the current date in the loop
+            for i in range(len(curCash)):
+                #only process cash for the input userID
+                if curCash[i][0] == userID:
+                    cashDate = datetime.strptime(curCash[i][3], '%Y-%m-%d')
+                    #only adds the code if the cash was taken out before the current date
+                    if cashDate <= currentDate:
+                        daysSince = (currentDate - cashDate).days
+                        runningTotal += float(curCash[i][2]) * ((1 + ((float(curCash[i][4]) / 100) / 365)) ** daysSince)
+            runningTotalEveryDay.append(runningTotal)
+            dateList.append(currentDate)
+            currentDate += timedelta(days=1)
+
+        return [runningTotalEveryDay, dateList]
+
+    #append to a 2d array, then plot the array
+    main = tk.Tk()
+    main.title("Cash")
+    main.geometry("500x500")  # Set your desired width and height
+
+    width, height = 300, 300
+
+    #converts from px to inches
+    figsize = (3, 3)
+
+    #creates the window for the graph of a set size
+    f = Figure(figsize=figsize, dpi=100)
+    #adds a subplot to the window
+    a = f.add_subplot(111)
+
+    #plots the data on the graph
+    cashData = calcCash(userID)
+    a.plot(cashData[1], cashData[0], ls='-')
+    a.set_title("Value")
+    a.set_xlabel("Date")
+
+    #creates the canvas for the graph to be displayed on
+    canvas = FigureCanvasTkAgg(f, master=main)
+    canvas.draw()
+    canvas.get_tk_widget().pack()
+
     cursor.execute("SELECT * FROM cash WHERE userID = %s", (userID,))
     curCash = cursor.fetchall()
 
-    #adds the cash information to the list of cash
-    curCash.sort(key=lambda x: datetime.strptime(x[3], '%Y-%m-%d'))
-    #get todays date, as well as the final date
-    startDate = datetime.strptime(curCash[0][3], '%Y-%m-%d')
-    endDate = datetime.today()
+    #creates the add cash function, with boxes
+    tk.Label(main, text="Add Cash", font='Helvetica 16').place(x=20, y=600)
+    #creates the add cash function, with boxes
+    addCashName = tk.Label(main, text="Name")
+    addCashName.place(x=50, y=640)
+    enterCashName = Entry(main, width=35)
+    enterCashName.place(x=75, y=670, width=100)
 
-    runningTotalEveryDay = []
-    dateList = []
+    addCashAmount = tk.Label(main, text="Value")
+    addCashAmount.place(x=50, y=700)
+    enterCashAmount = Entry(main, width=35)
+    enterCashAmount.place(x=75, y=730, width=100)
 
-    #iterates over every day in the list, and calculates the total cash on that day
-    currentDate = startDate
-    while currentDate <= endDate:
-        runningTotal = 0
-        #checks to see if the day the cash was taken out is before the current date in the loop
-        for i in range(len(curCash)):
-            #only process cash for the input userID
-            if curCash[i][0] == userID:
-                cashDate = datetime.strptime(curCash[i][3], '%Y-%m-%d')
-                #only adds the code if the cash was taken out before the current date
-                if cashDate <= currentDate:
-                    daysSince = (currentDate - cashDate).days
-                    runningTotal += float(curCash[i][2]) * ((1 + ((float(curCash[i][4]) / 100) / 365)) ** daysSince)
-        runningTotalEveryDay.append(runningTotal)
-        dateList.append(currentDate)
-        currentDate += timedelta(days=1)
+    addCashDate = tk.Label(main, text="Date")
+    addCashDate.place(x=50, y=760)
+    enterCashDate = Entry(main, width=35)
+    enterCashDate.place(x=75, y=790, width=100)
 
-    return [runningTotalEveryDay, dateList]
+    addCashAPR = tk.Label(main, text="APR")
+    addCashAPR.place(x=50, y=820)
+    enterCashAPR = Entry(main, width=35)
+    enterCashAPR.place(x=75, y=850, width=100)
+    #button which adds the cash
+    addCashButton = tk.Button(main, text="Add Cash", command=lambda: cashAdd(userID, enterCashName.get(), enterCashAmount.get(), enterCashDate.get(), 
+                                                                            enterCashAPR.get()))
+    addCashButton.place(x=75, y=880, width=100)
 
-#append to a 2d array, then plot the array
-main = tk.Tk()
-main.title("Cash")
-main.geometry("500x500")  # Set your desired width and height
+    tk.Label(main, text = "Remove Cash", font='Helvetica 16').place(x = 1000, y = 600)
 
-width, height = 300, 300
+    #creates the remove cash function, with boxes
+    removeCashName = tk.Label(main, text="Name")
+    removeCashName.place(x=1000, y=640)
+    enterRemoveCashName = Entry(main, width=35)
+    enterRemoveCashName.place(x=1025, y=670, width=100)
 
-#converts from px to inches
-figsize = (3, 3)
+    removeCashAmount = tk.Label(main, text="Value")
+    removeCashAmount.place(x=1000, y=700)
+    enterRemoveCashAmount = Entry(main, width=35)
+    enterRemoveCashAmount.place(x=1025, y=730, width=100)
 
-#creates the window for the graph of a set size
-f = Figure(figsize=figsize, dpi=100)
-#adds a subplot to the window
-a = f.add_subplot(111)
+    removeCashAPR = tk.Label(main, text="APR")
+    removeCashAPR.place(x=1000, y=780)
+    enterRemoveCashAPR = Entry(main, width=35)
+    enterRemoveCashAPR.place(x=1025, y=810, width=100)
 
-#plots the data on the graph
-cashData = calcCash(userID)
-a.plot(cashData[1], cashData[0], ls='-')
-a.set_title("Value")
-a.set_xlabel("Date")
+    #button which removes the cash
+    removeCashButton = tk.Button(main, text="Remove Cash", command=lambda: cashRemove(userID, enterRemoveCashName.get(), 
+                                                                                    enterRemoveCashAmount.get(), enterRemoveCashAPR.get()))
+    removeCashButton.place(x=1000, y=840, width=100)
 
-#creates the canvas for the graph to be displayed on
-canvas = FigureCanvasTkAgg(f, master=main)
-canvas.draw()
-canvas.get_tk_widget().pack()
-
-cursor.execute("SELECT * FROM cash WHERE userID = %s", (userID,))
-curCash = cursor.fetchall()
-
-#creates the add cash function, with boxes
-tk.Label(main, text="Add Cash", font='Helvetica 16').place(x=20, y=600)
-#creates the add cash function, with boxes
-addCashName = tk.Label(main, text="Name")
-addCashName.place(x=50, y=640)
-enterCashName = Entry(main, width=35)
-enterCashName.place(x=75, y=670, width=100)
-
-addCashAmount = tk.Label(main, text="Value")
-addCashAmount.place(x=50, y=700)
-enterCashAmount = Entry(main, width=35)
-enterCashAmount.place(x=75, y=730, width=100)
-
-addCashDate = tk.Label(main, text="Date")
-addCashDate.place(x=50, y=760)
-enterCashDate = Entry(main, width=35)
-enterCashDate.place(x=75, y=790, width=100)
-
-addCashAPR = tk.Label(main, text="APR")
-addCashAPR.place(x=50, y=820)
-enterCashAPR = Entry(main, width=35)
-enterCashAPR.place(x=75, y=850, width=100)
-#button which adds the cash
-addCashButton = tk.Button(main, text="Add Cash", command=lambda: cashAdd(userID, enterCashName.get(), enterCashAmount.get(), enterCashDate.get(), 
-                                                                         enterCashAPR.get()))
-addCashButton.place(x=75, y=880, width=100)
-
-tk.Label(main, text = "Remove Cash", font='Helvetica 16').place(x = 1000, y = 600)
-
-#creates the remove cash function, with boxes
-removeCashName = tk.Label(main, text="Name")
-removeCashName.place(x=1000, y=640)
-enterRemoveCashName = Entry(main, width=35)
-enterRemoveCashName.place(x=1025, y=670, width=100)
-
-removeCashAmount = tk.Label(main, text="Value")
-removeCashAmount.place(x=1000, y=700)
-enterRemoveCashAmount = Entry(main, width=35)
-enterRemoveCashAmount.place(x=1025, y=730, width=100)
-
-removeCashAPR = tk.Label(main, text="APR")
-removeCashAPR.place(x=1000, y=780)
-enterRemoveCashAPR = Entry(main, width=35)
-enterRemoveCashAPR.place(x=1025, y=810, width=100)
-
-#button which removes the cash
-removeCashButton = tk.Button(main, text="Remove Cash", command=lambda: cashRemove(userID, enterRemoveCashName.get(), 
-                                                                                  enterRemoveCashAmount.get(), enterRemoveCashAPR.get()))
-removeCashButton.place(x=1000, y=840, width=100)
-
-main.mainloop()
+    main.mainloop()

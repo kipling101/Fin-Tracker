@@ -2,7 +2,7 @@ import tkinter as tk
 import mysql.connector
 from tkinter import *
 from tkinter import messagebox
-
+#for refereence 0 = debt, 1 = cash, 2 = investment, 3 = account management, 4 = create account
 #initialise variables, will be made inputs later
 userID = 4
 levelReq = '1010'
