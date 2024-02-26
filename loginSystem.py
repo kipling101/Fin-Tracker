@@ -244,36 +244,45 @@ def openDebtForm(userID):
     main.geometry("1980x1080")
     main.title("FinTracker")
 
-    home = tk.Button(main, text ="Home", command = lambda: print("Home"), width=25, height = 10).grid(row=0, sticky = "W")
-    cash = tk.Button(main, text ="Cash", command = lambda: print("cash"), width=25, height = 10).grid(row=1, sticky = "W")
-    debt = tk.Button(main, text ="Debt", command = lambda: print("debt"), width=25, height = 10).grid(row=2, sticky = "W")
-    padding = tk.Label(main, text = " ", width=25, height = 17).grid(row=3, sticky = "W")
-    account = tk.Button(main, text ="Account", command = lambda: print("account"), width=25, height = 6).grid(row=4, sticky = "W")
+    buttonFrame = tk.Frame(main)
+    buttonFrame.pack(side="left")
 
+    home = tk.Button(buttonFrame, text ="Home", command = lambda: [main.destroy, openHomePage(userID)], width=25, height = 10)
+    home.grid(row=0, sticky = "W")
+
+    cash = tk.Button(buttonFrame, text ="Cash", command = lambda: [print("Hi"), openCashForm(userID)], width=25, height = 10)
+    cash.grid(row=1, sticky = "W")
+
+    debt = tk.Button(buttonFrame, text ="Debt", command = lambda: [print("Hi"), openDebtForm(userID)], width=25, height = 10)
+    debt.grid(row=2, sticky = "W")
+
+    padding = tk.Label(buttonFrame, text = " ", width=25, height = 17)
+    padding.grid(row=3, sticky = "W")
+
+    account = tk.Button(buttonFrame, text ="Account", command = lambda: [main.destroy, openAccountMgmForm(userID)], width=25, height = 6)
+    account.grid(row=4, sticky = "W")
 
     width, height = 100, 100
 
-    #converts from px to inches
-    figsize = 1,1
+    figSize = 1,1
 
-    #creates the window for the graph of a set size
-    f = Figure(figsize=figsize, dpi=100)
-    #adds a subplot to the window
+    f = Figure(figsize=figSize, dpi=100)
     a = f.add_subplot(111)
-    calcDebt = calcDebt(userID, totalDebt)
-    #plots the data on the graph
-    a.plot(calcDebt(userID,totalDebt)[1], calcDebt(userID,totalDebt)[0], ls = '-')
+    calcDebt2 = calcDebt(userID, totalDebt)
+    a.plot(calcDebt2[1], calcDebt2[0], ls = '-')
 
     a.set_title("Debt Amount")
     a.set_xlabel("Date")
     a.set_ylabel("Value (£)")
 
+    canvasFrame = tk.Frame(main)
+    canvasFrame.pack(side="right")
+
     #creates the canvas for the graph to be displayed on
-    canvas1=FigureCanvasTkAgg(f,master=main)
+    canvas1=FigureCanvasTkAgg(f,master=canvasFrame)
     canvas1.draw()
     canvas1.get_tk_widget().pack()
 
-    #creates the add debt function, with boxes
     tk.Label(main, text = "Add Debt", font='Helvetica 16').place(x = 20, y = 600)
 
     addDebtName = tk.Label(main, text="Name")
@@ -301,16 +310,16 @@ def openDebtForm(userID):
 
     tk.Label(main, text = "Remove Debt", font='Helvetica 16').place(x = 1000, y = 600)
 
-    #creates an entry field for the user to input the amount they want ro remove
     enterRemoveAmount = tk.Entry(main, width=35)
     enterRemoveAmount.place(x=1000, y=700, width=100)
-    #creates a dropdown box which contains the tranaction ids for the debts
     debtCombobox = ttk.Combobox(main, values=[debt[5] for debt in curDebt])
     debtCombobox.place(x=1000, y=650, width=100)
-    #button which removes the debt
-    removeDebtButton = tk.Button(main, text="Remove Debt", command=lambda: remDebt(userID, debtCombobox.get(), enterRemoveAmount.get())).place(x=1000, y=750, width=100)
+    removeDebtButton = tk.Button(main, text="Remove Debt", command=lambda: remDebt(userID, debtCombobox.get(), enterRemoveAmount.get()))
+    removeDebtButton.place(x=1000, y=750, width=100)
 
     main.mainloop()
+
+openDebtForm(userID)
 
 def openCashForm(userID):
         
@@ -413,7 +422,7 @@ def openCashForm(userID):
     canvas = FigureCanvasTkAgg(f, master=main)
     canvas.draw()
     canvas.get_tk_widget().pack()
-
+    ## add something which lets users press a button to get a more detailed graph??? ##
     cursor.execute("SELECT * FROM cash WHERE userID = %s", (userID,))
     curCash = cursor.fetchall()
 
@@ -477,10 +486,6 @@ def openAccountCreator():
     
     def createAccount(inputUsername, inputPassword, inputPasswordVerify):
 
-        #initialise database connection
-        db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-        cursor = db.cursor()
-
         #retrieves a list of usernames from the database where the username is equal to the inputted username
         #if they are the same then it returns a message saying the username already exists
 
@@ -543,7 +548,7 @@ def openAccountCreator():
 
     main.mainloop()
 
-def accountManagementForm():
+def openAccountMgmForm():
 
     if privCheck(userID, '00010') == False:
         tk.messagebox.showerror("Error", "You do not have permission to access this page.")
@@ -595,7 +600,7 @@ def accountManagementForm():
         home = tk.Button(main, text ="Home", command = openHomePage(userID), width=25, height = 10).grid(row=0, sticky = "W")
         cash = tk.Button(main, text ="Cash", command = openCashForm(userID), width=25, height = 10).grid(row=1, sticky = "W")
         debt = tk.Button(main, text ="Debt", command = openDebtForm(userID), width=25, height = 10).grid(row=2, sticky = "W")
-        account = tk.Button(main, text ="Account", command = accountManagementForm(userID), width=25, height = 14).grid(row=4, sticky = "W")
+        account = tk.Button(main, text ="Account", command = openAccountMgmForm(userID), width=25, height = 14).grid(row=4, sticky = "W")
 
     main = tk.Tk()
     main.title("Modify Permissions")
@@ -801,3 +806,22 @@ def openInvestmentForm(userID):
 
 def openHomePage(userID):
     print("Home Page")
+
+def createMenu(root, userID):
+    buttonFrame = tk.Frame(root)
+    buttonFrame.pack(side="left")
+
+    home = tk.Button(buttonFrame, text ="Home", command = lambda: [root.destroy(), openHomePage(userID)], width=25, height = 10)
+    home.grid(row=0, sticky = "W")
+
+    cash = tk.Button(buttonFrame, text ="Cash", command = lambda: [print("Hi"), openCashForm(userID)], width=25, height = 10)
+    cash.grid(row=1, sticky = "W")
+
+    debt = tk.Button(buttonFrame, text ="Debt", command = lambda: [print("Hi"), openDebtForm(userID)], width=25, height = 10)
+    debt.grid(row=2, sticky = "W")
+
+    padding = tk.Label(buttonFrame, text = " ", width=25, height = 17)
+    padding.grid(row=3, sticky = "W")
+
+    account = tk.Button(buttonFrame, text ="Account", command = lambda: [root.destroy(), openAccountMgmForm(userID)], width=25, height = 6)
+    account.grid(row=4, sticky = "W")
