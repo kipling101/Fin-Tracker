@@ -8,12 +8,13 @@ import matplotlib
 matplotlib.use('TkAgg')
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
+import menu
+
+db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
+cursor = db.cursor()
 
 def openInvestmentForm(userID):
     
-    db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-    cursor = db.cursor()
-
     def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
 
         if addShareDate > datetime.now().strftime('%Y-%m-%d') or addShareDate == "":
@@ -88,12 +89,10 @@ def openInvestmentForm(userID):
 
                     #iterate over each investment
                     for investment in investments:
-                        # Extract the number of shares and the opening price
-                        sharesHeld = float(investment[2])  # replace 1 with the correct index for sharesHeld in your data
-                        openPrice = stockHist['Open'][date]
-
+                        
+                        sharesHeld = float(investment[2]) 
                         #calculate teh value of this investment and add it to the total
-                        totalValue += openPrice * sharesHeld
+                        totalValue += stockHist['Open'][date] * sharesHeld
 
                 #append the total value and the date to the lists
                 valHistory.append(totalValue)
@@ -102,9 +101,10 @@ def openInvestmentForm(userID):
             return [valHistory, dateHistory]
 
     main = tk.Tk()
-    main.title("Cash")
-    main.geometry("500x500")  # Set your desired width and height
-
+    main.title("Investment")
+    main.state('zoomed') #sets the desired width and height of the image
+    #creates the menu
+    menu.createMenu(main, userID)
     width, height = 300, 300
 
     #converts from px to inches
@@ -126,45 +126,48 @@ def openInvestmentForm(userID):
     canvas.draw()
     canvas.get_tk_widget().pack()
 
-    #creates the add cash function, with boxes
-    tk.Label(main, text="Add Investment", font='Helvetica 16').place(x=20, y=600)
-    #creates the add cash function, with boxes
+    #creates the add investment function, with boxes
+    tk.Label(main, text="Add Investment", font='Helvetica 16').place(x=430, y=600)
+   
     addTicker = tk.Label(main, text="Ticker")
-    addTicker.place(x=50, y=640)
+    addTicker.place(x=445, y=640)
     enterTickerName = Entry(main, width=35)
-    enterTickerName.place(x=75, y=670, width=100)
+    enterTickerName.place(x=470, y=670, width=100)
 
     addStockAmount = tk.Label(main, text="Quantity to Add")
-    addStockAmount.place(x=50, y=700)
+    addStockAmount.place(x=445, y=700)
     enterStockAmount = Entry(main, width=35)
-    enterStockAmount.place(x=75, y=730, width=100)
+    enterStockAmount.place(x=470, y=730, width=100)
 
     addStockDate = tk.Label(main, text="Date")
-    addStockDate.place(x=50, y=760)
+    addStockDate.place(x=445, y=760)
     enterStockDate = Entry(main, width=35)
-    enterStockDate.place(x=75, y=790, width=100)
+    enterStockDate.place(x=470, y=790, width=100)
 
     #button which adds the investment
     addInvestButton = tk.Button(main, text="Add Investment", command=lambda: addInvestment(userID, enterTickerName.get(), enterStockAmount.get(), 
                                                                                         enterStockDate.get()))
-    addInvestButton.place(x=75, y=880, width=100)
+    addInvestButton.place(x=440, y=880, width=100)
 
-    tk.Label(main, text = "Liquidate Position", font='Helvetica 16').place(x = 1000, y = 600)
-
-    #creates the remove cash function, with boxes
-    removeStockQuan = tk.Label(main, text="Quantity to Remove")
-    removeStockQuan.place(x=1000, y=700)
-    enterRemoveStockQuan = Entry(main, width=35)
-    enterRemoveStockQuan.place(x=1025, y=730, width=100)
+    tk.Label(main, text = "Liquidate Position", font='Helvetica 16').place(x = 1410, y = 600)
 
     cursor.execute("SELECT * FROM currInvestment WHERE userID = %s", (userID,))
     curInvestment = cursor.fetchall()
 
+    investmentTrns = tk.Label(main, text="Investment Ticker")
+    investmentTrns.place(x=1425, y=640)
     #creates a dropdown box which contains the tranaction ids for the debts
     investCombobox = ttk.Combobox(main, values=[investment[1] for investment in curInvestment])
-    investCombobox.place(x=1025, y=650, width=100)
-    #button which removes the debt
-    removeDebtButton = tk.Button(main, text="Liquidate Position", command=lambda: remInvestment(userID, investCombobox.get(), 
-                                                                                                float(enterRemoveStockQuan.get()))).place(x=1000, y=780, width=100)
+    investCombobox.place(x=1455, y=670, width=100)
 
+    #creates the remove cash function, with boxes
+    removeStockQuan = tk.Label(main, text="Quantity to Remove")
+    removeStockQuan.place(x=1425, y=700)
+    enterRemoveStockQuan = Entry(main, width=35)
+    enterRemoveStockQuan.place(x=1455, y=730, width=100)
+
+    #button which removes the debt
+    removeDebtButton = tk.Button(main, text="Liquidate", command=lambda: remInvestment(userID, 
+                                                                                       investCombobox.get(), float(enterRemoveStockQuan.get())))
+    removeDebtButton.place(x=1420, y=780, width=100)
     main.mainloop()

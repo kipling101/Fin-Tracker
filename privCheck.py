@@ -1,17 +1,19 @@
-import tkinter as tk
+import yfinance as yf
+import datetime; from datetime import timedelta, datetime
 import mysql.connector
-from tkinter import *
-from tkinter import messagebox
-#for refereence 0 = debt, 1 = cash, 2 = investment, 3 = account management, 4 = create account
-#initialise variables, will be made inputs later
-userID = 4
-levelReq = '1010'
+import pandas as pd
+import tkinter as tk
+from tkinter import *; from tkinter import ttk
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+
+db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
+cursor = db.cursor()
 
 def privCheck(userID, levelReq):
 
-    #initialise database connection
-    db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-    cursor = db.cursor()
     #finds the privilege level of the user given by the userID
     cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userID,))
     userPriv = cursor.fetchall()
@@ -20,9 +22,13 @@ def privCheck(userID, levelReq):
     userPrivList = [*str(userPriv[0][0])]
 
     if userPriv == "":
-        print("An error has occured, no such user exists. Please try again.")
-        return
+        tk.messagebox.showerror("Error", "An error has occured, please try again.")
+        return False
 
+    if len(userPrivList) != 5:
+        tk.messagebox.showerror("Error", "An error has occured, please try again.")
+        return False
+    
     #checks if the user has sufficient privileges for each element in the list, if element 0 of both lists 
     #are equal to 1 then it returns True, if user has does not have permission
     #for an element, but levelReq is 1 then it returns False. Otherwise returns nothing
@@ -37,5 +43,3 @@ def privCheck(userID, levelReq):
             continue
     
     return True
-#runs the function
-print(privCheck(userID, levelReq))

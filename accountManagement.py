@@ -1,12 +1,20 @@
-import tkinter as tk
+import yfinance as yf
+import datetime; from datetime import timedelta, datetime
 import mysql.connector
-from tkinter import *
-from tkinter import messagebox
+import pandas as pd
+import tkinter as tk
+from tkinter import *; from tkinter import ttk
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import privCheck as pc; import menu
 
-def accountManagementForm():
-    #initialises the database connection
-    db = mysql.connector.connect(host="localhost", user="root", password="pass123", db="FinTracker")
-    cursor = db.cursor()
+db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
+cursor = db.cursor()
+
+def openAccountMgmForm(userID):
+
 
     def getUserPrivileges(userID):
         cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userID,))
@@ -46,39 +54,25 @@ def accountManagementForm():
         userIDEntry.delete("0", "end")
 
     #opens the account creation window
-    def openAccountCreator():
+    def openAccountCreator(userID):
         import accountCreator
-        accountCreator.main()
-
-    import run
-    def menuPage():
-
-        #creates the menu interface
-        root = tk.Tk()
-        root.geometry("1980x1080")
-        root.title("FinTracker")
-
-        home = tk.Button(root, text ="Home", command = run.goHome, width=25, height = 10).grid(row=0, sticky = "W")
-        cash = tk.Button(root, text ="Cash", command = run.goCash, width=25, height = 10).grid(row=1, sticky = "W")
-        debt = tk.Button(root, text ="Debt", command = run.goDebt, width=25, height = 10).grid(row=2, sticky = "W")
-        account = tk.Button(root, text ="Account", command = run.goAccount, width=25, height = 14).grid(row=4, sticky = "W")
-
-        root.mainloop()
+        accountCreator.openAccountCreator(userID)
 
     main = tk.Tk()
     main.title("Modify Permissions")
     main.state('zoomed')
+
+    #creates the menu
+    menu.createMenu(main, userID)
     #places locations for the tite, as well as the userID label and entry
-    title = tk.Label(main, text="Modify Permissions", font="Helvetica 20", justify="center")
-    title.place(x=350, y=20)
+    title = tk.Label(main, text="Modify Permissions", font="Helvetica 24", justify="center")
+    title.place(x=340, y=20)
 
     userIDLabel = tk.Label(main, text="User ID:", font="Helvetica 12")
-    userIDLabel.place(x=70, y=100)
+    userIDLabel.place(x=370, y=80)
 
-    userIDEntry = tk.Entry(main, font="Helvetica 12")
-    userIDEntry.place(x=170, y=100)
-
-    menuPage()
+    userIDEntry = tk.Entry(main, font="Helvetica 12", width=40)
+    userIDEntry.place(x=460, y=80)
 
     var1 = tk.IntVar(value=0)
     var2 = tk.IntVar(value=0)
@@ -86,22 +80,21 @@ def accountManagementForm():
     var4 = tk.IntVar(value=0)
     var5 = tk.IntVar(value=0)
     #adds checkboxes which change the variable to the current value of the user's permissions
-    tk.Checkbutton(main, text="Cash", variable=var1).grid(row=1, sticky=tk.W)
-    tk.Checkbutton(main, text="Investment", variable=var2).grid(row=2, sticky=tk.W)
-    tk.Checkbutton(main, text="Debt", variable=var3).grid(row=3, sticky=tk.W)
-    tk.Checkbutton(main, text="Admin", variable=var4).grid(row=4, sticky=tk.W)
-    tk.Checkbutton(main, text="Account Creator", variable=var5).grid(row=5, sticky=tk.W)
+    tk.Checkbutton(main, text="Cash", variable=var1).place(x=370, y=150, anchor="w")
+    tk.Checkbutton(main, text="Investment", variable=var2).place(x=370, y=180, anchor="w")
+    tk.Checkbutton(main, text="Debt", variable=var3).place(x=370, y=210, anchor="w")
+    tk.Checkbutton(main, text="Admin", variable=var4).place(x=370, y=240, anchor="w")
+    tk.Checkbutton(main, text="Account Creator", variable=var5).place(x=370, y=270, anchor="w")
     #adds buttons which change the variable to the current value of the user's permissions
-    updateButton = tk.Button(main, text="Update", font="Helvetica 12", command=lambda: changeVariable(var1, var2, var3, var4, var5))
-    updateButton.place(x=300, y=190)
-
     modifyButton = tk.Button(main, text="Modify", font="Helvetica 12", command=lambda: permModify(userIDEntry.get(), [var1.get(), var2.get(), 
                                                                                                                     var3.get(), var4.get(), var5.get()]))
-    modifyButton.place(x=150, y=190)
+    modifyButton.place(x=340, y=360)
+
+    updateButton = tk.Button(main, text="Update", font="Helvetica 12", command=lambda: changeVariable(var1, var2, var3, var4, var5))
+    updateButton.place(x=500, y=360)
 
     #places the button which opens the account creation window
-    openAccountCreatorButton = tk.Button(main, text="Create Account", font="Helvetica 12", command=lambda:openAccountCreator)
-    openAccountCreatorButton.place(x=450, y=190)
-
+    openAccountCreatorButton = tk.Button(main, text="Create Account", font="Helvetica 12", command=lambda:openAccountCreator(userID))
+    openAccountCreatorButton.place(x=660, y=360)
 
     main.mainloop()

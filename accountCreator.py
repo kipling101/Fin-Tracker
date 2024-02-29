@@ -1,16 +1,25 @@
-import tkinter as tk
+import yfinance as yf
+import datetime; from datetime import timedelta, datetime
 import mysql.connector
+import pandas as pd
 import tkinter as tk
-from tkinter import *
-from tkinter import messagebox
+from tkinter import *; from tkinter import ttk
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import privCheck as pc
 
-def __main__():
+db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
+cursor = db.cursor()
 
+def openAccountCreator(userID):
+    #ensures that the user has permission to both access the admin page and create an account
+    if pc.privCheck(userID, '00011') == False:
+        tk.messagebox.showerror("Error", "You do not have permission to access this page.")
+        return
+    
     def createAccount(inputUsername, inputPassword, inputPasswordVerify):
-
-        #initialise database connection
-        db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
-        cursor = db.cursor()
 
         #retrieves a list of usernames from the database where the username is equal to the inputted username
         #if they are the same then it returns a message saying the username already exists
@@ -73,4 +82,3 @@ def __main__():
     cancelBtn.place(x = 50, y = 250, width = 55)
 
     main.mainloop()
-
