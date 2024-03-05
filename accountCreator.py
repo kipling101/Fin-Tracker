@@ -1,52 +1,54 @@
+import yfinance as yf
+import datetime; from datetime import timedelta, datetime
 import mysql.connector
+import pandas as pd
 import tkinter as tk
-from tkinter import messagebox; from tkinter import Entry
+from tkinter import *; from tkinter import ttk
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 import privCheck as pc
 
 db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
 cursor = db.cursor()
 
 def openAccountCreator(userID):
-
     #ensures that the user has permission to both access the admin page and create an account
     if pc.privCheck(userID, '00011') == False:
         tk.messagebox.showerror("Error", "You do not have permission to access this page.")
         return
     
     def createAccount(inputUsername, inputPassword, inputPasswordVerify):
-        try:
-            #retrieves a list of usernames from the database where the username is equal to the inputted username
-            #if they are the same then it returns a message saying the username already exists
 
-            cursor.execute("SELECT * FROM Users WHERE name = %s", (inputUsername,))
-            duplicateCheck = cursor.fetchall()
-            
-            if duplicateCheck:
-                print("Username already exists, please try again.")
-                return
+        #retrieves a list of usernames from the database where the username is equal to the inputted username
+        #if they are the same then it returns a message saying the username already exists
 
-            #checks if the inputted password and the inputted password verification are the same, if they are 
-            #then it inserts the username and password into the database
-            if inputPassword == inputPasswordVerify:
-                cursor.execute("INSERT INTO Users (name, password) VALUES (%s, %s)", (inputUsername, inputPassword))
-                db.commit()
-
-                userID = cursor.lastrowid
-                #creates a new user in the privileges table with the default privileges of 00 and the userID from the Users table
-                cursor.execute("INSERT INTO privileges (userID, privLevel) VALUES (%s, %s)", (userID, 00))
-                db.commit()
-
-                #informs the user that the account has been created
-                tk.messagebox.showinfo(title="Create Account",message="Account created successfully.")
-                main.destroy()
-
-            else:
-                print("Passwords do not match, please try again.")
-        except mysql.connector.errors.DataError:
-            tk.messagebox.showerror(title="Add Cash", message="Error: Entry Data.")
-        except Exception as e:
-            tk.messagebox.showerror(title="Add Cash", message="Error: " + str(e))
+        cursor.execute("SELECT * FROM Users WHERE name = %s", (inputUsername,))
+        duplicateCheck = cursor.fetchall()
         
+        if duplicateCheck:
+            print("Username already exists, please try again.")
+            return
+
+        #checks if the inputted password and the inputted password verification are the same, if they are 
+        #then it inserts the username and password into the database
+        if inputPassword == inputPasswordVerify:
+            cursor.execute("INSERT INTO Users (name, password) VALUES (%s, %s)", (inputUsername, inputPassword))
+            db.commit()
+
+            userID = cursor.lastrowid
+            #creates a new user in the privileges table with the default privileges of 00 and the userID from the Users table
+            cursor.execute("INSERT INTO privileges (userID, privLevel) VALUES (%s, %s)", (userID, 00))
+            db.commit()
+
+            #informs the user that the account has been created
+            tk.messagebox.showinfo(title="Create Account",message="Account created successfully.")
+            main.destroy()
+
+        else:
+            print("Passwords do not match, please try again.")
+
     main = tk.Tk()
     main.geometry("400x600")
     main.title("Create Account")

@@ -1,11 +1,21 @@
+import yfinance as yf
+import datetime; from datetime import timedelta, datetime
 import mysql.connector
-import tkinter as tk; from tkinter import messagebox; from tkinter import Entry; from tkinter import tix; from tkinter.tix import Balloon
-import menu
+import pandas as pd
+import tkinter as tk
+from tkinter import *; from tkinter import ttk
+import matplotlib
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import privCheck as pc; import menu
 
 db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
 cursor = db.cursor()
 
 def openAccountMgmForm(userID):
+
+
     def getUserPrivileges(userID):
         cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userID,))
         curUserPriv = cursor.fetchall()
@@ -48,14 +58,12 @@ def openAccountMgmForm(userID):
         import accountCreator
         accountCreator.openAccountCreator(userID)
 
-    main = tix.Tk()
+    main = tk.Tk()
     main.title("Modify Permissions")
     main.state('zoomed')
 
     #creates the menu
     menu.createMenu(main, userID)
-    helpObject = Balloon(main)
-
     #places locations for the tite, as well as the userID label and entry
     title = tk.Label(main, text="Modify Permissions", font="Helvetica 24", justify="center")
     title.place(x=340, y=20)
@@ -88,10 +96,5 @@ def openAccountMgmForm(userID):
     #places the button which opens the account creation window
     openAccountCreatorButton = tk.Button(main, text="Create Account", font="Helvetica 12", command=lambda:openAccountCreator(userID))
     openAccountCreatorButton.place(x=660, y=360)
-
-    helpObject.bind_widget(modifyButton, balloonmsg="Modify the permissions of the user given by the User ID. Tick or untick the boxes to change the permissions.")
-    helpObject.bind_widget(updateButton, balloonmsg="Update the permissions of the user given by the User ID. Press after inputting the userID.")
-    helpObject.bind_widget(openAccountCreatorButton, balloonmsg="Open the account creation window.")
-    helpObject.bind_widget(userIDEntry, balloonmsg="Input the User ID of the user whose permissions you want to modify.")
 
     main.mainloop()

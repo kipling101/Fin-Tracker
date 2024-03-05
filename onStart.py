@@ -1,8 +1,20 @@
+
+import tkinter as tk
+from tkinter import ttk
+from tkinter import *
+from tkinter import messagebox
 import mysql.connector
+import yfinance as yf
 import datetime
+from datetime import timedelta
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-import homePage as hp
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('TkAgg')
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import calendar
 
 db = mysql.connector.connect(host="localhost", user="root", password="pass123", db="FinTracker")
 cursor = db.cursor()
@@ -33,7 +45,5 @@ def onStart(userID):
             cursor.execute("UPDATE lastAccessed SET date = %s WHERE userid = %s", (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), userID))
             cursor.execute("UPDATE payments SET paymentDate = %s WHERE userid = %s and paymentID = %s", ((datetime.now().strftime('%Y-%m-%d %H:%M:%S')+relativedelta(months=+1)), userID, payments[i][4]))
             db.commit()
-
-    hp.openHomePage(userID)
 
 
