@@ -1,9 +1,4 @@
-import tkinter as tk; from tkinter import ttk; from tkinter import *; from tkinter import messagebox
-import mysql.connector
-import yfinance as yf
-import datetime; from datetime import timedelta; from datetime import datetime; from dateutil.relativedelta import relativedelta
-import matplotlib; import matplotlib.pyplot as plt; matplotlib.use('TkAgg')
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg; from matplotlib.figure import Figure
+import tkinter as tk; from tkinter import Entry; from tkinter import messagebox
 import homePage as hp; import cashForm as cf; import debtForm as df; import accountManagement as amf; import privCheck as pc; import investmentForm as inf
 
 def openHome(userID, main):

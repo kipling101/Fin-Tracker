@@ -1,13 +1,5 @@
-import yfinance as yf
-import datetime; from datetime import timedelta, datetime
 import mysql.connector
-import pandas as pd
-import tkinter as tk
-from tkinter import *; from tkinter import ttk
-import matplotlib
-matplotlib.use('TkAgg')
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
+import tkinter as tk; from tkinter import messagebox
 
 db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
 cursor = db.cursor()
