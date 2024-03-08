@@ -47,27 +47,30 @@ def loginSystem():
     try:        
         #creates the login window
         main = tk.Tk()
-        main.geometry("250x300")
+        main.geometry("320x400")
         main.title("FinTracker")
         main.resizable(0,0)
         
+        welcomeLabel = tk.Label(main, text ="Login", font = "Helvetica 19")
+        welcomeLabel.place(x = 110, y = 20)
+
         labUsername = tk.Label(main, text ="Username")
-        labUsername.place(x = 50, y = 20)
+        labUsername.place(x = 80, y = 80)
 
         enterUsrn = Entry(main, width = 35)
-        enterUsrn.place(x = 75, y = 50, width = 100)
+        enterUsrn.place(x = 105, y = 110, width = 100)
 
         labPwd = tk.Label(main, text ="Password")
-        labPwd.place(x = 50, y = 80)
+        labPwd.place(x = 80, y = 150)
 
         enterPwd = Entry(main, show="*", width = 35)
-        enterPwd.place(x = 75, y = 110, width = 100)
+        enterPwd.place(x = 105, y = 180, width = 100)
         #creates a button which calls the submitLogin function when clicked
         loginBtn = tk.Button(main, text ="Login", bg ='aqua', command = submitLogin)
-        loginBtn.place(x = 150, y = 155, width = 55)
+        loginBtn.place(x = 170, y = 240, width = 70)
 
         cancelBtn = tk.Button(main, text ="Cancel", bg ='aqua', command = main.destroy)
-        cancelBtn.place(x = 50, y = 155, width = 55)
+        cancelBtn.place(x = 70, y = 240, width = 70)
         
         main.mainloop()
 
