@@ -37,7 +37,7 @@ def openCashForm(userID):
 
     def cashRemove(userID, removeName, removeAmount, removeAPR):
         try:
-            #inverts the values to add the cash and apr
+            #inverts the values of the removeAmount value
             if userID == "" or removeName == "" or removeAmount == "" or removeAPR == "":
                 tk.messagebox.showerror(title="Remove Cash", message="Error: Please input all fields.")
                 return
@@ -53,6 +53,7 @@ def openCashForm(userID):
             tk.messagebox.showerror(title="Error",message="Invalid data entered.")
         except Exception as e: 
             tk.messagebox.showerror(title="Error", message="Error: " + str(e))
+
     def calcCash(userID):
         try:
             dateList = []
@@ -76,13 +77,11 @@ def openCashForm(userID):
                 runningTotal = 0
                 #checks to see if the day the cash was taken out is before the current date in the loop
                 for i in range(len(curCash)):
-                    #only process cash for the input userID
-                    if curCash[i][0] == userID:
-                        cashDate = datetime.strptime(curCash[i][3], '%Y-%m-%d')
-                        #only adds the code if the cash was taken out before the current date
-                        if cashDate <= startDate:
-                            daysSince = (startDate - cashDate).days
-                            runningTotal += float(curCash[i][2]) * ((1 + ((float(curCash[i][4]) / 100) / 365)) ** daysSince)
+                    cashDate = datetime.strptime(curCash[i][3], '%Y-%m-%d')
+                    #only adds the code if the cash was taken out before the current date
+                    if cashDate <= startDate:
+                        daysSince = (startDate - cashDate).days
+                        runningTotal += float(curCash[i][2]) * ((1 + ((float(curCash[i][4]) / 100) / 365)) ** daysSince)
                 runningTotalEveryDay.append(runningTotal)
                 dateList.append(startDate)
                 startDate += timedelta(days=1)

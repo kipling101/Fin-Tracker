@@ -58,15 +58,11 @@ def openDebtForm(userID):
         except Exception as e: 
             tk.messagebox.showerror(title="Error", message="Error: " + str(e))
 
-
     def addDebt(userID, addDebtAmount, addDebtName, addDebtDate, addDebtAPR):
         try:
             if userID and addDebtAmount and addDebtName and addDebtDate and addDebtAPR:
                 if addDebtDate > datetime.now().strftime('%Y-%m-%d'):
                     tk.messagebox.showerror("Error", "Please enter a valid date!")
-                    return
-                if float(addDebtAmount) < 0 and addDebtAmount.replace(".", "").isnotnumeric():
-                    tk.messagebox.showerror("Error", "Please enter a valid amount!")
                     return
                 if float(addDebtAPR) < 0:
                     tk.messagebox.showerror("Error", "Please enter a valid APR!")
@@ -89,34 +85,20 @@ def openDebtForm(userID):
         except Exception as e: 
             tk.messagebox.showerror(title="Error", message="Error: " + str(e))
 
-
-    def remDebt(userID, trnsNum, removeAmount):
+    def remDebt(userID, removeName, removeAmount, removeAPR):
         try:
-            #checks if there is a debt that matches the inputted data
-            cursor.execute("SELECT * FROM debtHoldings WHERE userID = %s AND transactionNumber = %s", (userID, trnsNum))
-            debts = cursor.fetchall()
-
-            for debt in debts:
-                #calculates the current value of the debt with compound interest
-                debtValue = float(debt[1])
-                debtDate = datetime.strptime(debt[3], '%Y-%m-%d')
-                APR = float(debt[4])
-                daysSince = (datetime.now() - debtDate).days
-                currentValue = debtValue * ((1 + (APR / 100 / 365)) ** daysSince)
-
-                #calculates the new value of the debt after removing the specified amount
-                newValue = currentValue - float(removeAmount)
-                if newValue < 0:
-                    newValue = 0
-
-                #updates the debt value in the database
-                cursor.execute("UPDATE debtHoldings SET debtValue = %s WHERE userID = %s AND transactionNumber = %s", (newValue, userID, trnsNum))
-                db.commit()  
-
-            if debts:
-                tk.messagebox.showinfo("Success", "Debt removed successfully!")
-            else:    
-                tk.messagebox.showerror("Error", "Debt not found!")
+            #inverts the values of removeDebt amount
+            if userID == "" or removeName == "" or removeAmount == "" or removeAPR == "":
+                tk.messagebox.showerror(title="Remove Debt", message="Error: Please input all fields.")
+                return
+            if removeAmount.replace(".", "").isnumeric() or removeAPR.replace(".", "").isnumeric():
+                removeAmount = float(removeAmount); removeAPR = float(removeAPR)
+                removeAmount = removeAmount * -1
+                removeDate = datetime.now().strftime('%Y-%m-%d')
+                addDebt(userID, removeAmount, removeName, removeDate, removeAPR)
+            else: 
+                tk.messagebox.showerror(title="Remove Debt", message="Error: Invalid Amount or APR.")
+                return
         except mysql.connector.errors.DataError:
             tk.messagebox.showerror(title="Error",message="Invalid data entered.")
         except Exception as e: 
@@ -155,7 +137,7 @@ def openDebtForm(userID):
         #creates the information table
         breakLabel = tk.Label(main, text = "", font='Helvetica 16').pack() #creates a gap for aesthetics
         tree = ttk.Treeview(main)
-        columns = ('Name', 'Amount', 'Date', 'APR', 'Transaction Number')  #column names
+        columns = ('Amount', 'Name', 'Date', 'APR', 'Transaction Number')  #column names
 
         #create columns
         tree['columns'] = columns
@@ -196,18 +178,26 @@ def openDebtForm(userID):
 
         tk.Label(main, text = "Remove Debt", font='Helvetica 16').place(x = 1410, y = 600)
 
-        debtSelLabel = tk.Label(main, text="Debt Transaction Number")
-        debtSelLabel.place(x=1425, y=640)
-        debtCombobox = ttk.Combobox(main, values=[debt[5] for debt in curDebt])
-        debtCombobox.place(x=1455, y=670, width=100)
-        
-        removeAmountLabel = tk.Label(main, text="Amount to Remove")
-        removeAmountLabel.place(x=1425, y=700)
-        enterRemoveAmount = tk.Entry(main, width=35)
-        enterRemoveAmount.place(x=1455, y=730, width=100)
+         #creates the remove debt function, with boxes
+        removeDebtName = tk.Label(main, text="Name")
+        removeDebtName.place(x=1420, y=640)
+        enterRemoveDebtName = Entry(main, width=35)
+        enterRemoveDebtName.place(x=1455, y=670, width=100)
 
-        removeDebtButton = tk.Button(main, text="Remove Debt", command=lambda: remDebt(userID, debtCombobox.get(), enterRemoveAmount.get()))
-        removeDebtButton.place(x=1420, y=780, width=100)
+        removeDebtAmount = tk.Label(main, text="Value")
+        removeDebtAmount.place(x=1420, y=700)
+        enterRemoveDebtAmount = Entry(main, width=35)
+        enterRemoveDebtAmount.place(x=1455, y=730, width=100)
+
+        removeDebtAPR = tk.Label(main, text="APR")
+        removeDebtAPR.place(x=1420, y=760)
+        enterRemoveDebtAPR = Entry(main, width=35)
+        enterRemoveDebtAPR.place(x=1455, y=790, width=100)
+
+        #button which removes the debt
+        removeDebtButton = tk.Button(main, text="Remove Debt", command=lambda: remDebt(userID, enterRemoveDebtName.get(), 
+                                                                                        enterRemoveDebtAmount.get(), enterRemoveDebtAPR.get()))
+        removeDebtButton.place(x=1420, y=840, width=100)
 
         helpObject = Balloon(main)
 
@@ -216,8 +206,7 @@ def openDebtForm(userID):
         helpObject.bind_widget(enterDebtDate,balloonmsg="Enter the date the debt was taken out. Format: YYYY-MM-DD")
         helpObject.bind_widget(enterDebtAPR,balloonmsg="Enter the APR of the debt in percent. Do not include the % symbol.")
         helpObject.bind_widget(addDebtButton,balloonmsg="Add values entered to the debt table.")
-        helpObject.bind_widget(debtCombobox,balloonmsg="Select the transaction number of the debt you wish to remove.")
-        helpObject.bind_widget(enterRemoveAmount,balloonmsg="Enter the amount of debt you wish to remove, in £.")
+        helpObject.bind_widget(enterRemoveDebtAmount,balloonmsg="Enter the amount of debt you wish to remove, in £.")
         helpObject.bind_widget(removeDebtButton,balloonmsg="Remove the debt from the table.")
 
         main.mainloop()
