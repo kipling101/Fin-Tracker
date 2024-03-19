@@ -8,24 +8,15 @@ db = mysql.connector.connect(host ="localhost", user = "root", password = "pass1
 cursor = db.cursor()
 
 def openDebtForm(userID):
-    totalDebt = 0
+
     
-    def calcDebt(userID, totalDebt):
+    def calcDebt(userID):
         try:
             #retrieves current debt information for the user given by the userID
             cursor.execute("SELECT * FROM debtHoldings WHERE userID = %s", (userID,))
             curDebt = cursor.fetchall()
     
             today = datetime.today() #finds the current date
-
-            for i in curDebt:
-                debtName = i[2] #to be used for the visual interface
-            
-                debtDate = datetime.strptime(i[3], '%Y-%m-%d') #formats the debt data to a datetime object
-                daysSince = (today - debtDate).days #finds the number of days since the debt was taken out
-
-                #calculates the interest accrued on the debt using compound interest formula, and adds it to the total debt
-                totalDebt += float(i[1])*((1+((i[4]/100)/365))**daysSince)
 
             #adds the debt information to the list of debts
             curDebt.sort(key=lambda x: datetime.strptime(x[3], '%Y-%m-%d'))
@@ -121,7 +112,7 @@ def openDebtForm(userID):
         debtOvTime = f.add_subplot(111)
 
         #plots the data on the graph
-        calcDebt2 = calcDebt(userID, totalDebt)
+        calcDebt2 = calcDebt(userID)
         debtOvTime.plot(calcDebt2[1], calcDebt2[0], ls = '-')
         debtOvTime.set_title("Debt Amount")
         debtOvTime.set_xlabel("Date")

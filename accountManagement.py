@@ -106,8 +106,8 @@ def openAccountMgmForm(userID):
     openAccountCreatorButton = tk.Button(main, text="Create Account", font="Helvetica 12", command=lambda:openAccountCreator(userID))
     openAccountCreatorButton.place(x=660, y=360)
 
-    logOffBtn = tk.Button(main, text="Log Off", font="Helvetica 12", command=lambda: logOff())
-    logOffBtn.place(x=800, y=300, width = 100)
+    logOffBtn = tk.Button(main, text="Log Off", font="Helvetica 12", bg="lightgrey", command=lambda: logOff())
+    logOffBtn.place(x=428, y=450, width = 200)
 
     helpObject = Balloon(main)
     helpObject.bind_widget(modifyButton, balloonmsg="Modify the permissions of the user given by the User ID. Tick or untick the boxes to change the permissions.")

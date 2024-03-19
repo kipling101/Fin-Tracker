@@ -83,7 +83,7 @@ def openCashForm(userID):
                         daysSince = (startDate - cashDate).days
                         runningTotal += float(curCash[i][2]) * ((1 + ((float(curCash[i][4]) / 100) / 365)) ** daysSince)
                 runningTotalEveryDay.append(runningTotal)
-                dateList.append(startDate)
+                dateList.append(startDate) #appends the values to the array for graph creating
                 startDate += timedelta(days=1)
 
             return [runningTotalEveryDay, dateList]
@@ -108,7 +108,7 @@ def openCashForm(userID):
         #adds a subplot to the window
         cashOvTime = f.add_subplot(111)
 
-        #plots the data on the graph
+        #plots the data on the graph, defining important information
         cashData = calcCash(userID)
         cashOvTime.plot(cashData[1], cashData[0], ls='-')
         cashOvTime.set_title("Total Value")
@@ -120,7 +120,7 @@ def openCashForm(userID):
         canvas = FigureCanvasTkAgg(f, master=main)
         canvas.draw()
         canvas.get_tk_widget().pack()
-        ## add something which lets users press a button to get a more detailed graph??? ##
+        
         cursor.execute("SELECT * FROM cash WHERE userID = %s", (userID,))
         curCash = cursor.fetchall()
 
@@ -145,7 +145,7 @@ def openCashForm(userID):
 
         #creates the add cash function, with boxes
         tk.Label(main, text="Add Cash", font='Helvetica 16').place(x=415, y=600)
-    #
+    
         addCashName = tk.Label(main, text="Name")
         addCashName.place(x=445, y=640)
         enterCashName = Entry(main, width=35)
@@ -193,6 +193,7 @@ def openCashForm(userID):
                                                                                         enterRemoveCashAmount.get(), enterRemoveCashAPR.get()))
         removeCashButton.place(x=1420, y=840, width=100)
 
+        #creates help boxes for the user
         helpObject = Balloon(main)
         helpObject.bind_widget(enterCashName, balloonmsg="Name of the transaction.")
         helpObject.bind_widget(enterCashAmount, balloonmsg="Value of the transaction on the day it was entered, in £.")

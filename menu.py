@@ -1,6 +1,7 @@
 import tkinter as tk; from tkinter import Entry; from tkinter import messagebox
 import homePage as hp; import cashForm as cf; import debtForm as df; import accountManagement as amf; import privCheck as pc; import investmentForm as inf
 
+#each respective function checks the user has permission and then opens the page
 def openHome(userID, main):
     main.destroy()
     hp.openHomePage(userID)
@@ -33,7 +34,7 @@ def openInvestment(userID, main):
     main.destroy()
     inf.openInvestmentForm(userID)
 
-def createMenu(main, userID):
+def createMenu(main, userID): #creates the menu for the main window
     buttonFrame = tk.Frame(main)
     buttonFrame.pack(side="left")
 

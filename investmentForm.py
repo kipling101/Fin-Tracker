@@ -12,6 +12,7 @@ def openInvestmentForm(userID):
     
     def addInvestment(userID, addStockTicker, addShareNum, addShareDate):
         try:
+            #checks if the inputted data is valid
             if addShareDate > datetime.now().strftime('%Y-%m-%d') or addShareDate == "":
                 tk.messagebox.showerror(title="Add Investment", message="Error: Invalid Date.")
                 return
@@ -25,8 +26,9 @@ def openInvestmentForm(userID):
             addInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
             cursor.execute(addInvSQL, (userID, addStockTicker, addShareNum, addShareDate))
             db.commit()
-
+            #displays a success message
             tk.messagebox.showinfo("Success", "Investment added successfully!")
+
         except mysql.connector.errors.DataError:
             tk.messagebox.showerror(title="Add Investment", message="Error: Entry Data.")
         except Exception as e:
@@ -41,7 +43,7 @@ def openInvestmentForm(userID):
 
             #if a result is returned, deletes the investment from the database
             if results and results[2] >= remShareNum:
-                newShareNum = remShareNum * -1
+                newShareNum = remShareNum * -1 #inverts the value for removing shares from the database
                 
                 removeInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
                 cursor.execute(removeInvSQL, (userID, remStockTicker, float(newShareNum), datetime.now().strftime('%Y-%m-%d'),))
@@ -60,23 +62,27 @@ def openInvestmentForm(userID):
         cursor.execute(calcInvSQL, (userID,))
         curHolding = cursor.fetchall()
 
-        # Find the earliest purchase date
+        #finds the first date of purchase
         earliestDate = min(datetime.strptime(i[3], '%Y-%m-%d') for i in curHolding)
 
-        # Generate dateOverTime from earliestDate to now
+        valOverTime = [0] * len(dateOverTime)  #creates a list of 0s the same length as the dateOverTime list
+
+        #creates a list of dates from the earliest date to the current date
         dateOverTime = [earliestDate + timedelta(days=i) for i in range((datetime.now() - earliestDate).days + 1)]
 
-        valOverTime = [0] * len(dateOverTime)  # Initialize with zeros
-
-        for i in curHolding:
+        for i in curHolding: #iterates over each investment holding
+            #strips important information from the database
             stockTicker = i[1]
             sharesHeld = i[2]
             datePur = datetime.strptime(i[3], '%Y-%m-%d')
 
             currDate = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
             stockInfo = yf.Ticker(stockTicker)
-            stockPrice = stockInfo.history(period="1d", start=datePur, end=currDate)
+            #gets the stock price from the date of purchase to the current date
+            stockPrice = stockInfo.history(period="1d", start=datePur, end=currDate) 
 
+            #creates a list of the value of the investment over time, only adding the value if it is not already present, 
+            #otherwise it adds the value to the existing value
             for j in range(len(dateOverTime)):
                 if dateOverTime[j] >= datePur and dateOverTime[j] <= currDate:
                     try:
@@ -179,6 +185,7 @@ def openInvestmentForm(userID):
                                                                                     investCombobox.get(), float(enterRemoveStockQuan.get())))
     removeStockButton.place(x=1420, y=780, width=120)
 
+    #creates help boxes for the user
     helpObject = Balloon(main)
     helpObject.bind_widget(enterTickerName, balloonmsg="Enter the ticker of the stock you want to add to the database.")
     helpObject.bind_widget(enterStockAmount, balloonmsg="Enter the number of shares you want to add to the database. Fractional shares are permitted.")

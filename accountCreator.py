@@ -26,6 +26,10 @@ def openAccountCreator(userID):
 
             #checks if the inputted password and the inputted password verification are the same, if they are 
             #then it inserts the username and password into the database
+            if len(inputPassword) < 8:
+                tk.messagebox.showerror(title="Create Account",message="Password must be at least 8 characters long.")
+                return
+            
             if inputPassword == inputPasswordVerify:
                 cursor.execute("INSERT INTO Users (name, password) VALUES (%s, %s)", (inputUsername, inputPassword))
                 db.commit()
@@ -40,7 +44,7 @@ def openAccountCreator(userID):
                 main.destroy()
 
             else:
-                print("Passwords do not match, please try again.")
+                tk.messagebox.showerror(title="Create Account",message="Passwords do not match, please try again.")
     except mysql.connector.errors.DataError:
         tk.messagebox.showerror(title="Error",message="Invalid data entered.")
     except Exception as e: 

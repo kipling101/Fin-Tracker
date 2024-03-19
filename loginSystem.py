@@ -5,15 +5,16 @@ db = mysql.connector.connect(host ="localhost", user = "root", password = "pass1
 cursor = db.cursor()
 
 def loginSystem():
-
+    #declare default values
     global incorrectAttempts; incorrectAttempts = 0
     result = [False]
+
     def submitLogin():
         try:
             global incorrectAttempts
             nonlocal result
             inputUsername = enterUsrn.get()
-            inputPassword = enterPwd.get()
+            inputPassword = enterPwd.get() #retrieve important information from the input fields
             
             if inputUsername == "" and inputPassword == "":    
                 tk.messagebox.showerror(title="Login",message="Please enter a username and password")
@@ -22,20 +23,19 @@ def loginSystem():
             cursor.execute("SELECT * FROM Users WHERE name = %s and password = %s", (inputUsername, inputPassword))
             userPresent = cursor.fetchall()
         
-            ## !! create code to handle multiple user with same name being returned !!
             if userPresent:
                 #retrieves the privLevel of the user
                 cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userPresent[0][0],))
                 privResults = cursor.fetchall()
                 tk.messagebox.showinfo(title="Login",message=" Login successful.\n\n Welcome "+inputUsername+".")
-                result = [True, privResults, userPresent[0][0]]
+                result = [True, privResults, userPresent[0][0]] #returns important information to the main function
                 main.destroy()
             
             else:
                 #if no users are returned the user will be informed via a error box
                 tk.messagebox.showerror(title="Login",message="Incorrect username or password")
                 incorrectAttempts += 1
-                if incorrectAttempts == 3:
+                if incorrectAttempts == 3: #if the user has entered the wrong password 3 times, the program will close
                     tk.messagebox.showerror(title="Login",message="Too many incorrect attempts, please try again later")
                     main.destroy()
                     result = [False]
