@@ -7,14 +7,14 @@ def openHome(userID, main):
     hp.openHomePage(userID)
 
 def openCash(userID, main):
-    if pc.privCheck(userID, '01000') == False:
+    if pc.privCheck(userID, '10000') == False:
         tk.messagebox.showerror("Error", "You do not have permission to access this page.")
         return
     main.destroy()
     cf.openCashForm(userID)
 
 def openDebt(userID, main):
-    if pc.privCheck(userID, '10000') == False:
+    if pc.privCheck(userID, '00100') == False:
         tk.messagebox.showerror("Error", "You do not have permission to access this page.")
         return
     main.destroy()
@@ -28,7 +28,7 @@ def openAccount(userID, main):
     amf.openAccountMgmForm(userID)
 
 def openInvestment(userID, main):
-    if pc.privCheck(userID, '00100') == False:
+    if pc.privCheck(userID, '01000') == False:
         tk.messagebox.showerror("Error", "You do not have permission to access this page.")
         return
     main.destroy()

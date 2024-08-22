@@ -1,5 +1,5 @@
 import tkinter as tk; from tkinter import Entry; from tkinter import messagebox
-import mysql.connector
+import mysql.connector; import homePage as hp
 
 db = mysql.connector.connect(host ="localhost", user = "root", password = "pass123", db ="FinTracker")
 cursor = db.cursor()
@@ -16,21 +16,23 @@ def loginSystem():
             inputUsername = enterUsrn.get()
             inputPassword = enterPwd.get() #retrieve important information from the input fields
             
-            if inputUsername == "" and inputPassword == "":    
-                tk.messagebox.showerror(title="Login",message="Please enter a username and password")
-
             #retrieves a list of users for which the username and password match the ones inputted into the Username and Password fields
             cursor.execute("SELECT * FROM Users WHERE name = %s and password = %s", (inputUsername, inputPassword))
             userPresent = cursor.fetchall()
+
+            if inputUsername == "" or inputPassword == "":    
+                tk.messagebox.showerror(title="Login",message="Please enter a username and password")
+                result = [False]
         
-            if userPresent:
+            elif userPresent:
                 #retrieves the privLevel of the user
                 cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userPresent[0][0],))
                 privResults = cursor.fetchall()
                 tk.messagebox.showinfo(title="Login",message=" Login successful.\n\n Welcome "+inputUsername+".")
                 result = [True, privResults, userPresent[0][0]] #returns important information to the main function
                 main.destroy()
-            
+                hp.openHomePage(userPresent[0][0])
+
             else:
                 #if no users are returned the user will be informed via a error box
                 tk.messagebox.showerror(title="Login",message="Incorrect username or password")
@@ -39,6 +41,7 @@ def loginSystem():
                     tk.messagebox.showerror(title="Login",message="Too many incorrect attempts, please try again later")
                     main.destroy()
                     result = [False]
+        
         except mysql.connector.errors.DataError:
             tk.messagebox.showerror(title="Error",message="Invalid data entered.")
         except Exception as e: 
@@ -73,7 +76,7 @@ def loginSystem():
         cancelBtn.place(x = 70, y = 240, width = 70)
         
         main.mainloop()
-
+        
         return result
     
     except mysql.connector.errors.DataError:

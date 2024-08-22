@@ -21,7 +21,7 @@ def openAccountCreator(userID):
             duplicateCheck = cursor.fetchall()
             
             if duplicateCheck:
-                print("Username already exists, please try again.")
+                tk.messagebox.showerror(title="Create Account", message="Username already exists, please try again.")
                 return
 
             #checks if the inputted password and the inputted password verification are the same, if they are 
@@ -35,8 +35,8 @@ def openAccountCreator(userID):
                 db.commit()
 
                 userID = cursor.lastrowid
-                #creates a new user in the privileges table with the default privileges of 00 and the userID from the Users table
-                cursor.execute("INSERT INTO privileges (userID, privLevel) VALUES (%s, %s)", (userID, 00))
+                #creates a new user in the privileges table with the default privileges of 00000 and the userID from the Users table
+                cursor.execute("INSERT INTO privileges (userID, privLevel) VALUES (%s, %s)", (userID, '00000'))
                 db.commit()
 
                 #informs the user that the account has been created
@@ -55,25 +55,25 @@ def openAccountCreator(userID):
     main.title("Create Account")
     main.resizable(0,0)
 
-    title = tk.Label(main, text ="Create Account", font = "Helvetica 16", justify = "center")
+    title = tk.Label(main, text ="Create Account", font = "Helvetica 16")
     title.place(x = 130, y = 20)
 
-    labUsername = tk.Label(main, text ="Username", justify = "center")
+    labUsername = tk.Label(main, text ="Username")
     labUsername.place(x = 50, y = 85)
 
-    enterUsrn = Entry(main, width = 35, justify = "center")
+    enterUsrn = Entry(main, width = 35)
     enterUsrn.place(x=50, y = 120, width = 300)
 
-    labPwd = tk.Label(main, text ="Password", justify = "center")
+    labPwd = tk.Label(main, text ="Password")
     labPwd.place(x = 50, y = 150)
 
     enterPwd = Entry(main, show="*", width = 35)
     enterPwd.place(x=50, y=185, width = 300)
 
-    labPwdVerify = tk.Label(main, text ="Verify Password", justify = "center")
+    labPwdVerify = tk.Label(main, text ="Verify Password")
     labPwdVerify.place(x = 50, y = 215)
 
-    enterPwdVerify = Entry(main, show="*", width = 35, justify = "center")
+    enterPwdVerify = Entry(main, show="*", width = 35)
     enterPwdVerify.place(x=50, y=250, width = 300)
 
     createBtn = tk.Button(main, text ="Create", bg ='aqua', command = lambda:createAccount(enterUsrn.get(), enterPwd.get(), enterPwdVerify.get()))

@@ -5,7 +5,7 @@ db = mysql.connector.connect(host ="localhost", user = "root", password = "pass1
 cursor = db.cursor()
 
 def privCheck(userID, levelReq):
-
+    print(userID)
     #finds the privilege level of the user given by the userID
     cursor.execute("SELECT privLevel FROM privileges WHERE userID = %s", (userID,))
     userPriv = cursor.fetchall()

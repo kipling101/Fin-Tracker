@@ -42,7 +42,7 @@ def openInvestmentForm(userID):
             results = cursor.fetchall()
 
             #if a result is returned, deletes the investment from the database
-            if results and results[2] >= remShareNum:
+            if results:
                 newShareNum = remShareNum * -1 #inverts the value for removing shares from the database
                 
                 removeInvSQL = "INSERT INTO currInvestment (userID, stockTicker, numSharesHeld, shareDate) VALUES (%s, %s, %s, %s)"
@@ -58,38 +58,41 @@ def openInvestmentForm(userID):
             tk.messagebox.showerror(title="Error", message="Error: " + str(e))
 
     def calcInvestment(userID):
-        calcInvSQL = "SELECT * FROM currInvestment WHERE userID = %s"
-        cursor.execute(calcInvSQL, (userID,))
-        curHolding = cursor.fetchall()
+        try:
+            calcInvSQL = "SELECT * FROM currInvestment WHERE userID = %s"
+            cursor.execute(calcInvSQL, (userID,))
+            curHolding = cursor.fetchall()
 
-        #finds the first date of purchase
-        earliestDate = min(datetime.strptime(i[3], '%Y-%m-%d') for i in curHolding)
+            #finds the first date of purchase
+            earliestDate = min(datetime.strptime(i[3], '%Y-%m-%d') for i in curHolding)
+            dateOverTime = [earliestDate + timedelta(days=i) for i in range((datetime.now() - earliestDate).days + 1)]
+            valOverTime = [0] * len(dateOverTime)  #creates a list of 0s the same length as the dateOverTime list
 
-        valOverTime = [0] * len(dateOverTime)  #creates a list of 0s the same length as the dateOverTime list
+            #creates a list of dates from the earliest date to the current date
+            
+            for i in curHolding: #iterates over each investment holding
+                #strips important information from the database
+                stockTicker = i[1]
+                sharesHeld = i[2]
+                datePur = datetime.strptime(i[3], '%Y-%m-%d')
 
-        #creates a list of dates from the earliest date to the current date
-        dateOverTime = [earliestDate + timedelta(days=i) for i in range((datetime.now() - earliestDate).days + 1)]
+                currDate = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
+                stockInfo = yf.Ticker(stockTicker)
+                #gets the stock price from the date of purchase to the current date
+                stockPrice = stockInfo.history(period="1d", start=datePur, end=currDate) 
 
-        for i in curHolding: #iterates over each investment holding
-            #strips important information from the database
-            stockTicker = i[1]
-            sharesHeld = i[2]
-            datePur = datetime.strptime(i[3], '%Y-%m-%d')
+                #creates a list of the value of the investment over time, only adding the value if it is not already present, 
+                #otherwise it adds the value to the existing value
+                for j in range(len(dateOverTime)):
+                    if dateOverTime[j] >= datePur and dateOverTime[j] <= currDate:
+                        try:
+                            valOverTime[j] += stockPrice['Open'][dateOverTime[j]] * sharesHeld
+                        except Exception as e:
+                            continue
+            return [valOverTime, dateOverTime]
+        except Exception as e: 
+            tk.messagebox.showerror(title="Error", message="Error: " + str(e))
 
-            currDate = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
-            stockInfo = yf.Ticker(stockTicker)
-            #gets the stock price from the date of purchase to the current date
-            stockPrice = stockInfo.history(period="1d", start=datePur, end=currDate) 
-
-            #creates a list of the value of the investment over time, only adding the value if it is not already present, 
-            #otherwise it adds the value to the existing value
-            for j in range(len(dateOverTime)):
-                if dateOverTime[j] >= datePur and dateOverTime[j] <= currDate:
-                    try:
-                        valOverTime[j] += stockPrice['Open'][dateOverTime[j]] * sharesHeld
-                    except Exception as e:
-                        continue
-        return [valOverTime, dateOverTime]
 
     main = tix.Tk()
     main.title("Investment")
@@ -100,45 +103,45 @@ def openInvestmentForm(userID):
 
     #creates the menu
     menu.createMenu(main, userID)
-    width, height = 300, 300
+    if len(curInvestment) != 0:
 
-    #converts from px to inches
-    figsize = 5.5,4
+        #converts from px to inches
+        figsize = 5.5,4
 
-    #creates the window for the graph of a set size
-    f = Figure(figsize=figsize, dpi=100)
-    #adds a subplot to the window
-    a = f.add_subplot(111)
+        #creates the window for the graph of a set size
+        f = Figure(figsize=figsize, dpi=100)
+        #adds a subplot to the window
+        a = f.add_subplot(111)
 
-    #plots the data on the graph
-    investOverTime = calcInvestment(userID)
-    a.plot(investOverTime[1], investOverTime[0], ls='-')
-    a.set_title("Value")
-    a.set_xlabel("Date")
+        #plots the data on the graph
+        investOverTime = calcInvestment(userID)
+        a.plot(investOverTime[1], investOverTime[0], ls='-')
+        a.set_title("Value")
+        a.set_xlabel("Date")
 
-    #creates the canvas for the graph to be displayed on
-    canvas = FigureCanvasTkAgg(f, master=main)
-    canvas.draw()
-    canvas.get_tk_widget().pack()
+        #creates the canvas for the graph to be displayed on
+        canvas = FigureCanvasTkAgg(f, master=main)
+        canvas.draw()
+        canvas.get_tk_widget().pack()
 
-    #creates the information table
-    breakLabel = tk.Label(main, text = "", font='Helvetica 16').pack() #creates a gap for aesthetics
-    tree = ttk.Treeview(main)
-    columns = ('Ticker', 'Quantity', 'Date', 'Transaction Number')  #column names
+        #creates the information table
+        breakLabel = tk.Label(main, text = "", font='Helvetica 16').pack() #creates a gap for aesthetics
+        tree = ttk.Treeview(main)
+        columns = ('Ticker', 'Quantity', 'Date', 'Transaction Number')  #column names
 
-    #create columns
-    tree['columns'] = columns
+        #create columns
+        tree['columns'] = columns
 
-    for column in columns:
-        tree.heading(column, text=column)
-        tree.column(column, width=60)
+        for column in columns:
+            tree.heading(column, text=column)
+            tree.column(column, width=60)
 
-    #adds only rows 1,2,4,5 to the table
-    for i, row in enumerate(curInvestment):
-        tree.insert('', 'end', values=(row[1], row[2], row[3], row[4]))
-    tree.column('#0', width=0)  #makes the first column v. small
-    #adds the table to the window
-    tree.pack()
+        #adds only rows 1,2,4,5 to the table
+        for i, row in enumerate(curInvestment):
+            tree.insert('', 'end', values=(row[1], row[2], row[3], row[4]))
+        tree.column('#0', width=0)  #makes the first column v. small
+        #adds the table to the window
+        tree.pack()
 
     #creates the add investment function, with boxes
     tk.Label(main, text="Add Investment", font='Helvetica 16').place(x=430, y=600)
